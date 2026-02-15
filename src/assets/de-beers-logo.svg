@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" fill="none">
+  <g fill="hsl(207, 100%, 24%)">
+    <!-- Diamond icon -->
+    <path d="M30 5 L45 20 L30 55 L15 20 Z" stroke="hsl(207, 100%, 24%)" stroke-width="2" fill="none"/>
+    <path d="M15 20 L45 20" stroke="hsl(207, 100%, 24%)" stroke-width="2"/>
+    <path d="M22 5 L30 20 L38 5" stroke="hsl(207, 100%, 24%)" stroke-width="1.5" fill="none"/>
+    
+    <!-- DE BEERS text -->
+    <text x="65" y="28" font-family="Georgia, 'Times New Roman', serif" font-size="16" font-weight="bold" letter-spacing="6" fill="hsl(207, 100%, 24%)">DE BEERS</text>
+    <text x="65" y="48" font-family="Georgia, 'Times New Roman', serif" font-size="10" letter-spacing="4" fill="hsl(207, 80%, 40%)">INVESTIMENTOS</text>
+  </g>
+</svg>

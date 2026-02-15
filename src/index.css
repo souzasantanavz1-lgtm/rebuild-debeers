@@ -2,49 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
+/* De Beers Design System - All colors in HSL */
+
 @layer base {
   :root {
-    --background: 220 20% 6%;
-    --foreground: 210 20% 92%;
+    --background: 0 0% 98%;
+    --foreground: 207 100% 24%;
 
-    --card: 220 18% 10%;
-    --card-foreground: 210 20% 92%;
+    --card: 0 0% 100%;
+    --card-foreground: 207 100% 24%;
 
-    --popover: 220 18% 10%;
-    --popover-foreground: 210 20% 92%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 207 100% 24%;
 
-    --primary: 190 95% 55%;
-    --primary-foreground: 220 20% 6%;
+    --primary: 207 100% 24%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 15% 16%;
-    --secondary-foreground: 210 20% 85%;
+    --secondary: 207 30% 95%;
+    --secondary-foreground: 207 100% 24%;
 
-    --muted: 220 15% 14%;
-    --muted-foreground: 215 15% 55%;
+    --muted: 207 20% 96%;
+    --muted-foreground: 207 30% 45%;
 
-    --accent: 260 80% 65%;
-    --accent-foreground: 210 20% 95%;
+    --accent: 207 100% 24%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 75% 55%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 18%;
-    --input: 220 15% 18%;
-    --ring: 190 95% 55%;
+    --border: 207 30% 85%;
+    --input: 207 30% 85%;
+    --ring: 207 100% 24%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    --glow-primary: 190 95% 55%;
-    --glow-accent: 260 80% 65%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 207 100% 24%;
+    --sidebar-primary: 207 100% 24%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 207 20% 95%;
+    --sidebar-accent-foreground: 207 100% 24%;
+    --sidebar-border: 207 20% 91%;
+    --sidebar-ring: 207 100% 24%;
+  }
 
-    --sidebar-background: 220 18% 8%;
-    --sidebar-foreground: 210 20% 85%;
-    --sidebar-primary: 190 95% 55%;
-    --sidebar-primary-foreground: 220 20% 6%;
-    --sidebar-accent: 220 15% 14%;
-    --sidebar-accent-foreground: 210 20% 85%;
-    --sidebar-border: 220 15% 18%;
-    --sidebar-ring: 190 95% 55%;
+  .dark {
+    --background: 207 100% 10%;
+    --foreground: 0 0% 98%;
+
+    --card: 207 100% 15%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 207 100% 15%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%;
+    --primary-foreground: 207 100% 24%;
+
+    --secondary: 207 50% 20%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 207 50% 20%;
+    --muted-foreground: 207 20% 70%;
+
+    --accent: 207 50% 20%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 207 50% 25%;
+    --input: 207 50% 25%;
+    --ring: 207 80% 60%;
+    --sidebar-background: 207 100% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 207 80% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 207 50% 18%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 207 50% 18%;
+    --sidebar-ring: 207 100% 50%;
   }
 }
 
@@ -58,31 +95,27 @@
   }
 }
 
-@layer utilities {
-  .glow-primary {
-    box-shadow: 0 0 20px hsl(var(--glow-primary) / 0.3),
-                0 0 60px hsl(var(--glow-primary) / 0.1);
+@keyframes slow-pan {
+  0% {
+    background-position: 20% 20%;
   }
-
-  .glow-primary-strong {
-    box-shadow: 0 0 20px hsl(var(--glow-primary) / 0.4),
-                0 0 60px hsl(var(--glow-primary) / 0.2),
-                0 0 100px hsl(var(--glow-primary) / 0.1);
+  50% {
+    background-position: 80% 80%;
   }
-
-  .glow-accent {
-    box-shadow: 0 0 20px hsl(var(--glow-accent) / 0.3),
-                0 0 60px hsl(var(--glow-accent) / 0.1);
+  100% {
+    background-position: 20% 20%;
   }
+}
 
-  .glass {
-    background: hsl(var(--card) / 0.6);
-    backdrop-filter: blur(20px);
-    border: 1px solid hsl(var(--border) / 0.5);
-  }
+.animate-slow-pan {
+  animation: slow-pan 25s ease-in-out infinite;
+  background-size: cover;
+  background-position: center;
+}
 
-  .text-glow {
-    text-shadow: 0 0 20px hsl(var(--glow-primary) / 0.5),
-                 0 0 40px hsl(var(--glow-primary) / 0.2);
+@media (max-width: 768px) {
+  .animate-slow-pan {
+    background-size: 150% auto;
+    animation: slow-pan 20s ease-in-out infinite;
   }
 }
