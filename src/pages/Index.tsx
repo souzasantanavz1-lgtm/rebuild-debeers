@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff, LogIn, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,10 +10,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
 import deBeersLogo from "@/assets/de-beers-logo.svg";
+import heroMiner from "@/assets/hero-miner.jpg";
+import heroDiamonds from "@/assets/hero-diamonds.jpg";
 
 const Index = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentImage, setCurrentImage] = useState(0);
+  const heroImages = [heroMiner, heroDiamonds];
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -28,6 +32,13 @@ const Index = () => {
       password: "",
     },
   });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % heroImages.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
@@ -50,16 +61,34 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
-      {/* Logo */}
-      <div className="mb-8">
-        <img
-          src={deBeersLogo}
-          alt="De Beers Logo"
-          className="h-16 w-auto"
-        />
+      {/* Hero Image Carousel */}
+      <div className="w-full max-w-md mb-6 rounded-xl overflow-hidden relative h-48">
+        {heroImages.map((img, i) => (
+          <img
+            key={i}
+            src={img}
+            alt={i === 0 ? "Mineração De Beers" : "Diamantes De Beers"}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+              i === currentImage ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        ))}
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+          {heroImages.map((_, i) => (
+            <span
+              key={i}
+              className={`w-2 h-2 rounded-full transition-colors ${
+                i === currentImage ? "bg-primary-foreground" : "bg-primary-foreground/40"
+              }`}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Welcome Text */}
+      {/* Logo */}
+      <div className="mb-4">
+        <img src={deBeersLogo} alt="De Beers Logo" className="h-14 w-auto" />
+      </div>
       <div className="text-center mb-8">
         <h1 className="text-3xl font-semibold text-primary mb-2">
           Bem-vindo de volta ✨
