@@ -1,18 +1,20 @@
-import { CalendarCheck, CreditCard, Banknote, Users, HelpCircle, TrendingUp, User } from "lucide-react";
+import { useState } from "react";
+import { CalendarCheck, CreditCard, Banknote, Users, HelpCircle, TrendingUp, User, LayoutGrid } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/BottomNav";
-import deBeersLogo from "@/assets/de-beers-logo.svg";
-import heroMiner from "@/assets/hero-miner.jpg";
 import heroDiamonds from "@/assets/hero-diamonds.jpg";
+import heroMiner from "@/assets/hero-miner.jpg";
 
 const actions = [
-  { icon: CalendarCheck, label: "Check-in", color: "text-primary" },
-  { icon: CreditCard, label: "Depósito", color: "text-primary" },
-  { icon: Banknote, label: "Saque", color: "text-primary" },
-  { icon: Users, label: "Indicação", color: "text-primary" },
-  { icon: HelpCircle, label: "Suporte", color: "text-primary" },
+  { icon: CalendarCheck, label: "Check-in" },
+  { icon: CreditCard, label: "Depósito" },
+  { icon: Banknote, label: "Saque" },
+  { icon: LayoutGrid, label: "por" },
+  { icon: Users, label: "Indicação" },
+  { icon: HelpCircle, label: "Suporte" },
 ];
+
+const heroImages = [heroMiner, heroDiamonds];
 
 const recentEarnings = [
   { name: "João S.****", plan: "Cofre de Diamantes", amount: "+R$ 88,00", time: "10 minutos atrás" },
@@ -25,96 +27,98 @@ const recentEarnings = [
 ];
 
 const Dashboard = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
   return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header with Logo */}
-      <header className="bg-card border-b border-border px-4 py-3 flex items-center justify-between">
-        <img src={deBeersLogo} alt="De Beers" className="h-10 w-auto" />
-        <p className="text-lg font-serif tracking-widest text-muted-foreground">
-          A DIAMOND IS FOREVER
-        </p>
+    <div className="min-h-screen bg-muted pb-20">
+      {/* Dark Blue Header */}
+      <header className="bg-primary text-primary-foreground px-4 py-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-serif tracking-wider">DE BEERS</h1>
+          <p className="text-[10px] tracking-[0.3em] opacity-80">A DIAMOND IS FOREVER</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs opacity-80">Saldo p/ Investir</p>
+          <p className="text-xl font-bold">R$ 0,00</p>
+        </div>
       </header>
 
-      {/* Balance */}
-      <div className="px-4 py-3 bg-card border-b border-border">
-        <p className="text-xs text-muted-foreground">Saldo Disponível</p>
-        <p className="text-xl font-bold text-primary">R$ 0,00</p>
-      </div>
-
-      {/* Hero Images Carousel */}
-      <div className="space-y-1">
-        <img src={heroMiner} alt="Mineração De Beers" className="w-full h-48 object-cover" />
-        <img src={heroDiamonds} alt="Diamantes De Beers" className="w-full h-48 object-cover" />
-      </div>
-
-      {/* Commerce Label */}
-      <div className="px-4 pt-4 pb-2">
-        <p className="text-sm text-muted-foreground font-medium">
-          Comércio exclusivo de diamantes
-        </p>
-      </div>
-
-      {/* Actions Grid */}
-      <div className="px-4 pb-4">
-        <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-          <span className="grid grid-cols-2 gap-0.5 h-4 w-4">
-            <span className="bg-primary rounded-sm" />
-            <span className="bg-primary rounded-sm" />
-            <span className="bg-primary rounded-sm" />
-            <span className="bg-primary rounded-sm" />
-          </span>
-          Ações
-        </h3>
-        <div className="flex justify-between gap-2">
-          {actions.map((action) => (
+      {/* Image Carousel */}
+      <div className="relative">
+        <div className="overflow-hidden">
+          <div
+            className="flex transition-transform duration-300"
+            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+          >
+            {heroImages.map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                alt={`Slide ${i + 1}`}
+                className="w-full h-52 object-cover flex-shrink-0"
+              />
+            ))}
+          </div>
+        </div>
+        {/* Dots */}
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+          {heroImages.map((_, i) => (
             <button
-              key={action.label}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-secondary transition-colors flex-1"
-            >
-              <action.icon className={`h-6 w-6 ${action.color}`} />
-              <span className="text-[10px] text-foreground font-medium text-center leading-tight">
-                {action.label}
-              </span>
-            </button>
+              key={i}
+              onClick={() => setCurrentSlide(i)}
+              className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                i === currentSlide ? "bg-primary" : "bg-primary-foreground/50"
+              }`}
+            />
           ))}
         </div>
       </div>
 
-      {/* Recent Earnings */}
-      <div className="px-4 pb-4">
-        <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-primary" />
-          Ganhos Recentes
-        </h3>
-        <div className="space-y-3">
-          {recentEarnings.map((earning, index) => (
-            <div key={index} className="flex items-start gap-3 py-2 border-b border-border last:border-0">
-              <div className="bg-secondary rounded-full p-2 mt-0.5">
-                <User className="h-4 w-4 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground">{earning.name}</p>
-                <p className="text-xs text-muted-foreground">{earning.plan}</p>
-                <p className="text-xs text-muted-foreground">{earning.time}</p>
-              </div>
-              <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                {earning.amount}
-              </p>
+      {/* Actions Card */}
+      <div className="px-4 mt-4">
+        <Card className="shadow-sm">
+          <CardContent className="p-5">
+            <h3 className="text-lg font-semibold text-primary mb-4">Ações</h3>
+            <div className="grid grid-cols-3 gap-3">
+              {actions.map((action) => (
+                <button
+                  key={action.label}
+                  className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:bg-secondary transition-colors"
+                >
+                  <action.icon className="h-7 w-7 text-primary" />
+                  <span className="text-xs text-foreground font-medium">{action.label}</span>
+                </button>
+              ))}
             </div>
-          ))}
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Deposit CTA */}
-      <div className="px-4 pb-6">
-        <Card className="border-border">
-          <CardContent className="p-4 flex items-center gap-3">
-            <CreditCard className="h-6 w-6 text-primary flex-shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-foreground">Depósito</p>
-              <p className="text-xs text-muted-foreground">Recarregue sua conta já</p>
+      {/* Recent Earnings Card */}
+      <div className="px-4 mt-4 pb-4">
+        <Card className="shadow-sm">
+          <CardContent className="p-5">
+            <h3 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Ganhos Recentes
+            </h3>
+            <div className="space-y-3">
+              {recentEarnings.map((earning, index) => (
+                <div key={index} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                  <div className="bg-secondary rounded-full p-2">
+                    <User className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">{earning.name}</p>
+                    <p className="text-xs text-muted-foreground">{earning.plan}</p>
+                    <p className="text-[10px] text-muted-foreground">{earning.time}</p>
+                  </div>
+                  <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                    {earning.amount}
+                  </p>
+                </div>
+              ))}
             </div>
-            <Button size="sm" variant="default">Depositar</Button>
           </CardContent>
         </Card>
       </div>
