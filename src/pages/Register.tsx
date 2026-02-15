@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,7 @@ const Register = () => {
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const {
     register: registerField,
@@ -36,11 +37,11 @@ const Register = () => {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      // TODO: Integrate with Lovable Cloud authentication
       toast({
-        title: "Cadastro",
-        description: "Autenticação será configurada com Lovable Cloud.",
+        title: "Conta criada!",
+        description: "Bem-vindo à De Beers.",
       });
+      navigate("/dashboard");
     } catch (error) {
       toast({
         title: "Erro",

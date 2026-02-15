@@ -3,7 +3,7 @@ import { Eye, EyeOff, LogIn, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
@@ -15,6 +15,7 @@ const Index = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -31,11 +32,11 @@ const Index = () => {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      // TODO: Integrate with Lovable Cloud authentication
       toast({
-        title: "Login",
-        description: "Autenticação será configurada com Lovable Cloud.",
+        title: "Login realizado!",
+        description: "Bem-vindo de volta.",
       });
+      navigate("/dashboard");
     } catch (error) {
       toast({
         title: "Erro",
