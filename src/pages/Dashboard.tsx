@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
-import { CalendarCheck, CreditCard, Banknote, Users, HelpCircle, TrendingUp, User, LayoutGrid } from "lucide-react";
+import { CalendarCheck, CreditCard, Banknote, Users, HelpCircle, TrendingUp, User, LayoutGrid, LogOut } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import BottomNav from "@/components/BottomNav";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 import heroDiamonds from "@/assets/hero-diamonds.jpg";
 import heroMiner from "@/assets/hero-miner.jpg";
 
@@ -9,7 +12,7 @@ const actions = [
   { icon: CalendarCheck, label: "Check-in" },
   { icon: CreditCard, label: "Depósito" },
   { icon: Banknote, label: "Saque" },
-  { icon: LayoutGrid, label: "por" },
+  { icon: LayoutGrid, label: "Planos" },
   { icon: Users, label: "Indicação" },
   { icon: HelpCircle, label: "Suporte" },
 ];
@@ -28,6 +31,9 @@ const recentEarnings = [
 
 const Dashboard = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [profile, setProfile] = useState<{ name: string; balance: number } | null>(null);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -35,6 +41,27 @@ const Dashboard = () => {
     }, 3000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from("profiles")
+        .select("name, balance")
+        .eq("user_id", user.id)
+        .single()
+        .then(({ data }) => {
+          if (data) setProfile(data);
+        });
+    }
+  }, [user]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
+  const displayName = profile?.name || user?.user_metadata?.name || "Usuário";
+  const balance = profile?.balance ?? 0;
 
   return (
     <div className="min-h-screen bg-muted pb-20">
@@ -44,9 +71,14 @@ const Dashboard = () => {
           <h1 className="text-xl font-serif tracking-wider">DE BEERS</h1>
           <p className="text-[10px] tracking-[0.3em] opacity-80">A DIAMOND IS FOREVER</p>
         </div>
-        <div className="text-right">
-          <p className="text-xs opacity-80">Saldo p/ Investir</p>
-          <p className="text-xl font-bold">R$ 0,00</p>
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <p className="text-xs opacity-80">Saldo p/ Investir</p>
+            <p className="text-xl font-bold">R$ {balance.toFixed(2).replace(".", ",")}</p>
+          </div>
+          <button onClick={handleSignOut} className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors">
+            <LogOut className="h-5 w-5" />
+          </button>
         </div>
       </header>
 
@@ -58,16 +90,10 @@ const Dashboard = () => {
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
           >
             {heroImages.map((img, i) => (
-              <img
-                key={i}
-                src={img}
-                alt={`Slide ${i + 1}`}
-                className="w-full h-52 object-cover flex-shrink-0"
-              />
+              <img key={i} src={img} alt={`Slide ${i + 1}`} className="w-full h-52 object-cover flex-shrink-0" />
             ))}
           </div>
         </div>
-        {/* Dots */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
           {heroImages.map((_, i) => (
             <button
@@ -81,8 +107,13 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Welcome */}
+      <div className="px-4 mt-4 mb-2">
+        <p className="text-sm text-muted-foreground">Olá, <span className="font-semibold text-foreground">{displayName}</span> 💎</p>
+      </div>
+
       {/* Actions Card */}
-      <div className="px-4 mt-4">
+      <div className="px-4">
         <Card className="shadow-sm">
           <CardContent className="p-5">
             <h3 className="text-lg font-semibold text-primary mb-4">Ações</h3>
