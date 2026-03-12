@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      deposits: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          method: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          method?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          method?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      investments: {
+        Row: {
+          amount: number
+          created_at: string
+          daily_return: number
+          expires_at: string | null
+          id: string
+          plan_name: string
+          started_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          daily_return?: number
+          expires_at?: string | null
+          id?: string
+          plan_name: string
+          started_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          daily_return?: number
+          expires_at?: string | null
+          id?: string
+          plan_name?: string
+          started_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           balance: number
@@ -45,6 +111,72 @@ export type Database = {
           phone?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          bonus_amount: number
+          created_at: string
+          id: string
+          level: number
+          referred_id: string
+          referrer_id: string
+        }
+        Insert: {
+          bonus_amount?: number
+          created_at?: string
+          id?: string
+          level?: number
+          referred_id: string
+          referrer_id: string
+        }
+        Update: {
+          bonus_amount?: number
+          created_at?: string
+          id?: string
+          level?: number
+          referred_id?: string
+          referrer_id?: string
+        }
+        Relationships: []
+      }
+      withdrawals: {
+        Row: {
+          amount: number
+          cpf: string | null
+          created_at: string
+          fee: number
+          id: string
+          net_amount: number
+          pix_key: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          cpf?: string | null
+          created_at?: string
+          fee?: number
+          id?: string
+          net_amount?: number
+          pix_key?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          cpf?: string | null
+          created_at?: string
+          fee?: number
+          id?: string
+          net_amount?: number
+          pix_key?: string | null
+          status?: string
           updated_at?: string
           user_id?: string
         }
