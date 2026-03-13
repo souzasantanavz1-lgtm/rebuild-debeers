@@ -9,6 +9,9 @@ import Index from "./pages/Index";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./pages/Perfil";
+import Deposito from "./pages/Deposito";
+import Saque from "./pages/Saque";
+import Planos from "./pages/Planos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
