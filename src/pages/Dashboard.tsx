@@ -35,6 +35,7 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<{ name: string; balance: number } | null>(null);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const interval = setInterval(() => {
