@@ -32,7 +32,7 @@ const recentEarnings = [
 
 const Dashboard = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [profile, setProfile] = useState<{ name: string; balance: number } | null>(null);
+  const [profile, setProfile] = useState<{ name: string; balance: number; referral_code: string | null } | null>(null);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
