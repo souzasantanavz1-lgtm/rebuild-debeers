@@ -48,7 +48,7 @@ const Dashboard = () => {
     if (user) {
       supabase
         .from("profiles")
-        .select("name, balance")
+        .select("name, balance, referral_code")
         .eq("user_id", user.id)
         .single()
         .then(({ data }) => {
