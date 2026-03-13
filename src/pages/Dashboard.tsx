@@ -10,12 +10,12 @@ import heroDiamonds from "@/assets/hero-diamonds.jpg";
 import heroMiner from "@/assets/hero-miner.jpg";
 
 const actions = [
-  { icon: CalendarCheck, label: "Check-in" },
-  { icon: CreditCard, label: "Depósito" },
-  { icon: Banknote, label: "Saque" },
-  { icon: LayoutGrid, label: "Planos" },
-  { icon: Users, label: "Indicação" },
-  { icon: HelpCircle, label: "Suporte" },
+  { icon: CalendarCheck, label: "Check-in", path: null, action: "checkin" },
+  { icon: CreditCard, label: "Depósito", path: "/deposito" },
+  { icon: Banknote, label: "Saque", path: "/saque" },
+  { icon: LayoutGrid, label: "Planos", path: "/planos" },
+  { icon: Users, label: "Indicação", path: null, action: "indicacao" },
+  { icon: HelpCircle, label: "Suporte", path: null, action: "suporte" },
 ];
 
 const heroImages = [heroMiner, heroDiamonds];
