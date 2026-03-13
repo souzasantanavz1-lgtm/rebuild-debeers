@@ -75,9 +75,9 @@ const Register = () => {
 
       toast({
         title: "Conta criada com sucesso! 🎉",
-        description: "Verifique seu e-mail para confirmar sua conta antes de fazer login.",
+        description: "Bem-vindo à De Beers!",
       });
-      navigate("/");
+      navigate("/dashboard");
     } catch {
       toast({
         title: "Erro",
