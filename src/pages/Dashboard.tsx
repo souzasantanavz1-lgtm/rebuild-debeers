@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { CalendarCheck, CreditCard, Banknote, Users, HelpCircle, TrendingUp, User, LayoutGrid, LogOut } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,12 +10,12 @@ import heroDiamonds from "@/assets/hero-diamonds.jpg";
 import heroMiner from "@/assets/hero-miner.jpg";
 
 const actions = [
-  { icon: CalendarCheck, label: "Check-in" },
-  { icon: CreditCard, label: "Depósito" },
-  { icon: Banknote, label: "Saque" },
-  { icon: LayoutGrid, label: "Planos" },
-  { icon: Users, label: "Indicação" },
-  { icon: HelpCircle, label: "Suporte" },
+  { icon: CalendarCheck, label: "Check-in", path: null, action: "checkin" },
+  { icon: CreditCard, label: "Depósito", path: "/deposito" },
+  { icon: Banknote, label: "Saque", path: "/saque" },
+  { icon: LayoutGrid, label: "Planos", path: "/planos" },
+  { icon: Users, label: "Indicação", path: null, action: "indicacao" },
+  { icon: HelpCircle, label: "Suporte", path: null, action: "suporte" },
 ];
 
 const heroImages = [heroMiner, heroDiamonds];
@@ -31,9 +32,10 @@ const recentEarnings = [
 
 const Dashboard = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [profile, setProfile] = useState<{ name: string; balance: number } | null>(null);
+  const [profile, setProfile] = useState<{ name: string; balance: number; referral_code: string | null } | null>(null);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -46,7 +48,7 @@ const Dashboard = () => {
     if (user) {
       supabase
         .from("profiles")
-        .select("name, balance")
+        .select("name, balance, referral_code")
         .eq("user_id", user.id)
         .single()
         .then(({ data }) => {
@@ -121,6 +123,17 @@ const Dashboard = () => {
               {actions.map((action) => (
                 <button
                   key={action.label}
+                  onClick={() => {
+                    if (action.path) {
+                      navigate(action.path);
+                    } else if (action.action === "checkin") {
+                      toast({ title: "Check-in realizado! ✅", description: "Seu check-in diário foi registrado." });
+                    } else if (action.action === "indicacao") {
+                      toast({ title: "Código de Indicação", description: `Seu código: ${profile?.referral_code || "Carregando..."}` });
+                    } else if (action.action === "suporte") {
+                      toast({ title: "Suporte", description: "Entre em contato pelo WhatsApp." });
+                    }
+                  }}
                   className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:bg-secondary transition-colors"
                 >
                   <action.icon className="h-7 w-7 text-primary" />
