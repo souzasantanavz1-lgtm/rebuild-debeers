@@ -123,6 +123,17 @@ const Dashboard = () => {
               {actions.map((action) => (
                 <button
                   key={action.label}
+                  onClick={() => {
+                    if (action.path) {
+                      navigate(action.path);
+                    } else if (action.action === "checkin") {
+                      toast({ title: "Check-in realizado! ✅", description: "Seu check-in diário foi registrado." });
+                    } else if (action.action === "indicacao") {
+                      toast({ title: "Código de Indicação", description: `Seu código: ${profile?.referral_code || "Carregando..."}` });
+                    } else if (action.action === "suporte") {
+                      toast({ title: "Suporte", description: "Entre em contato pelo WhatsApp." });
+                    }
+                  }}
                   className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:bg-secondary transition-colors"
                 >
                   <action.icon className="h-7 w-7 text-primary" />
