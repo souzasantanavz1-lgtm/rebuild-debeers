@@ -188,6 +188,7 @@ export type Database = {
     }
     Functions: {
       generate_referral_code: { Args: never; Returns: string }
+      get_user_balance: { Args: { _user_id: string }; Returns: number }
     }
     Enums: {
       [_ in never]: never
