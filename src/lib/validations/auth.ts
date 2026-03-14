@@ -26,8 +26,20 @@ export const registerSchema = z
       .min(6, "E-mail deve ter no mínimo 6 caracteres")
       .max(255, "E-mail deve ter no máximo 255 caracteres")
       .email("Formato de e-mail inválido"),
-    phone: z.string().optional(),
-    referralCode: z.string().optional(),
+    phone: z
+      .string()
+      .optional()
+      .refine(
+        (val) => !val || /^[\d\s()+-]{0,20}$/.test(val),
+        { message: "Formato de telefone inválido" }
+      ),
+    referralCode: z
+      .string()
+      .optional()
+      .refine(
+        (val) => !val || /^[A-Za-z0-9]{0,10}$/.test(val),
+        { message: "Código de indicação inválido" }
+      ),
     password: z
       .string()
       .min(1, "Senha é obrigatória")
