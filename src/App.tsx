@@ -34,6 +34,7 @@ const App = () => (
             <Route path="/saque" element={<ProtectedRoute><Saque /></ProtectedRoute>} />
             <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
             <Route path="/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
+            <Route path="/checkin" element={<ProtectedRoute><CheckIn /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
