@@ -10,7 +10,7 @@ import heroDiamonds from "@/assets/hero-diamonds.jpg";
 import heroMiner from "@/assets/hero-miner.jpg";
 
 const actions = [
-  { icon: CalendarCheck, label: "Check-in", path: null, action: "checkin" },
+  { icon: CalendarCheck, label: "Check-in", path: "/checkin" },
   { icon: CreditCard, label: "Depósito", path: "/deposito" },
   { icon: Banknote, label: "Saque", path: "/saque" },
   { icon: LayoutGrid, label: "Planos", path: "/planos" },

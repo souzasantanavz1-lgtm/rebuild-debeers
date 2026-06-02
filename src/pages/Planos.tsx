@@ -77,8 +77,14 @@ const Planos = () => {
         <div className="space-y-4">
           {plans.map((p) => {
             const roi = ((p.daily_return * p.duration_days) / p.price * 100).toFixed(0);
+            const isFeatured = p.price === Math.max(...plans.map((x) => Number(x.price)));
             return (
-              <Card key={p.id} className="overflow-hidden">
+              <Card key={p.id} className={`overflow-hidden relative ${isFeatured ? "ring-2 ring-primary shadow-lg" : ""}`}>
+                {isFeatured && (
+                  <div className="absolute top-3 right-3 z-10 bg-gradient-to-r from-amber-400 to-amber-600 text-white text-[10px] font-bold tracking-widest px-3 py-1 rounded-full shadow-md uppercase">
+                    ★ Indicado
+                  </div>
+                )}
                 <img
                   src={IMG[p.slug] || planLapidado}
                   alt={p.name}
