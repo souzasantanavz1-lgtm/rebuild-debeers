@@ -15,7 +15,7 @@ const actions = [
   { icon: Banknote, label: "Saque", path: "/saque" },
   { icon: LayoutGrid, label: "Planos", path: "/planos" },
   { icon: Users, label: "Indicação", path: null, action: "indicacao" },
-  { icon: HelpCircle, label: "Suporte", path: null, action: "suporte" },
+  { icon: HelpCircle, label: "Suporte", path: "/suporte" },
 ];
 
 const heroImages = [heroMiner, heroDiamonds];
@@ -123,15 +123,30 @@ const Dashboard = () => {
               {actions.map((action) => (
                 <button
                   key={action.label}
-                  onClick={() => {
+                  onClick={async () => {
                     if (action.path) {
                       navigate(action.path);
                     } else if (action.action === "checkin") {
-                      toast({ title: "Check-in realizado! ✅", description: "Seu check-in diário foi registrado." });
+                      if (!user) return;
+                      const { error } = await supabase.from("check_ins").insert({
+                        user_id: user.id,
+                        check_in_date: new Date().toISOString().slice(0, 10),
+                        bonus_amount: 1.0,
+                      });
+                      if (error) {
+                        if (error.code === "23505") {
+                          toast({ title: "Já feito hoje", description: "Volte amanhã para mais R$ 1,00 💎" });
+                        } else {
+                          toast({ title: "Erro", description: error.message, variant: "destructive" });
+                        }
+                      } else {
+                        toast({ title: "Check-in realizado! ✅", description: "+ R$ 1,00 no seu saldo." });
+                        const { data } = await supabase.from("profiles")
+                          .select("name, balance, referral_code").eq("user_id", user.id).single();
+                        if (data) setProfile(data);
+                      }
                     } else if (action.action === "indicacao") {
                       toast({ title: "Código de Indicação", description: `Seu código: ${profile?.referral_code || "Carregando..."}` });
-                    } else if (action.action === "suporte") {
-                      toast({ title: "Suporte", description: "Entre em contato pelo WhatsApp." });
                     }
                   }}
                   className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:bg-secondary transition-colors"
