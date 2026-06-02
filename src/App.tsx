@@ -13,6 +13,7 @@ import Deposito from "./pages/Deposito";
 import Saque from "./pages/Saque";
 import Planos from "./pages/Planos";
 import Suporte from "./pages/Suporte";
+import CheckIn from "./pages/CheckIn";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
