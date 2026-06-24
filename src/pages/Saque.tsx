@@ -51,12 +51,13 @@ const Saque = () => {
     if (!value || value <= 0) return toast({ title: "Valor inválido", variant: "destructive" });
     if (value > balance) return toast({ title: "Saldo insuficiente", variant: "destructive" });
     if (cpf.replace(/\D/g, "").length !== 11) return toast({ title: "CPF inválido", variant: "destructive" });
-    if (pixKey.trim().length < 4) return toast({ title: "Chave PIX inválida", variant: "destructive" });
+    const pix = pixKey.trim();
+    if (pix.length < 4 || pix.length > 140) return toast({ title: "Chave PIX inválida", description: "Use de 4 a 140 caracteres.", variant: "destructive" });
 
     setLoading(true);
     const { error } = await supabase.from("withdrawals").insert({
       user_id: user.id, amount: value, fee, net_amount: net,
-      cpf: cpf.replace(/\D/g, ""), pix_key: pixKey.trim(), status: "pending",
+      cpf: cpf.replace(/\D/g, ""), pix_key: pix, status: "pending",
     });
     setLoading(false);
     if (error) return toast({ title: "Erro", description: error.message, variant: "destructive" });
@@ -107,7 +108,7 @@ const Saque = () => {
               <div>
                 <Label className="text-sm">Chave PIX</Label>
                 <Input value={pixKey} onChange={(e) => setPixKey(e.target.value)}
-                  placeholder="CPF, e-mail, telefone ou chave aleatória" className="mt-1.5" />
+                  placeholder="CPF, e-mail, telefone ou chave aleatória" maxLength={140} className="mt-1.5" />
               </div>
 
               {value > 0 && (
