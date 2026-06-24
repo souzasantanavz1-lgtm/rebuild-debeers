@@ -123,30 +123,14 @@ const Dashboard = () => {
               {actions.map((action) => (
                 <button
                   key={action.label}
-                  onClick={async () => {
+                  onClick={() => {
                     if (action.path) {
                       navigate(action.path);
-                    } else if (action.action === "checkin") {
-                      if (!user) return;
-                      const { error } = await supabase.from("check_ins").insert({
-                        user_id: user.id,
-                        check_in_date: new Date().toISOString().slice(0, 10),
-                        bonus_amount: 1.0,
-                      });
-                      if (error) {
-                        if (error.code === "23505") {
-                          toast({ title: "Já feito hoje", description: "Volte amanhã para mais R$ 1,00 💎" });
-                        } else {
-                          toast({ title: "Erro", description: error.message, variant: "destructive" });
-                        }
-                      } else {
-                        toast({ title: "Check-in realizado! ✅", description: "+ R$ 1,00 no seu saldo." });
-                        const { data } = await supabase.from("profiles")
-                          .select("name, balance, referral_code").eq("user_id", user.id).single();
-                        if (data) setProfile(data);
-                      }
                     } else if (action.action === "indicacao") {
-                      toast({ title: "Código de Indicação", description: `Seu código: ${profile?.referral_code || "Carregando..."}` });
+                      toast({
+                        title: "Código de Indicação",
+                        description: `Seu código: ${profile?.referral_code || "Carregando..."}`,
+                      });
                     }
                   }}
                   className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:bg-secondary transition-colors"

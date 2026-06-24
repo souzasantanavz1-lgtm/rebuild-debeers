@@ -76,7 +76,12 @@ const Planos = () => {
 
         <div className="space-y-4">
           {plans.map((p) => {
-            const roi = ((p.daily_return * p.duration_days) / p.price * 100).toFixed(0);
+            const price = Number(p.price);
+            const daily = Number(p.daily_return);
+            const days = Number(p.duration_days);
+            const totalReturn = daily * days;                    // total recebido ao longo do plano
+            const profit = totalReturn - price;                  // lucro líquido
+            const profitPct = price > 0 ? (profit / price) * 100 : 0;
             const isFeatured = p.price === Math.max(...plans.map((x) => Number(x.price)));
             return (
               <Card key={p.id} className={`overflow-hidden relative ${isFeatured ? "ring-2 ring-primary shadow-lg" : ""}`}>
@@ -99,21 +104,36 @@ const Planos = () => {
                       <h3 className="font-semibold text-primary text-base">{p.name}</h3>
                       <p className="text-xs text-muted-foreground">{p.description}</p>
                     </div>
-                    <Badge variant="secondary">+{roi}%</Badge>
+                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                      Lucro +{profitPct.toFixed(0)}%
+                    </Badge>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 my-3 text-center">
                     <div className="bg-secondary rounded-md p-2">
                       <p className="text-[10px] text-muted-foreground">Investimento</p>
-                      <p className="text-sm font-bold">R$ {p.price}</p>
+                      <p className="text-sm font-bold tabular-nums">R$ {price.toFixed(0)}</p>
                     </div>
                     <div className="bg-secondary rounded-md p-2">
                       <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1"><TrendingUp className="h-3 w-3" />Diário</p>
-                      <p className="text-sm font-bold text-emerald-600">R$ {p.daily_return}</p>
+                      <p className="text-sm font-bold text-emerald-600 tabular-nums">R$ {daily.toFixed(2).replace(".", ",")}</p>
                     </div>
                     <div className="bg-secondary rounded-md p-2">
                       <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1"><Clock className="h-3 w-3" />Prazo</p>
-                      <p className="text-sm font-bold">{p.duration_days}d</p>
+                      <p className="text-sm font-bold tabular-nums">{days}d</p>
+                    </div>
+                  </div>
+
+                  <div className="rounded-md border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/30 p-2.5 mb-3 grid grid-cols-2 text-center">
+                    <div>
+                      <p className="text-[10px] text-muted-foreground">Total recebido</p>
+                      <p className="text-sm font-bold tabular-nums">R$ {totalReturn.toFixed(2).replace(".", ",")}</p>
+                    </div>
+                    <div className="border-l border-emerald-200 dark:border-emerald-900">
+                      <p className="text-[10px] text-muted-foreground">Lucro líquido</p>
+                      <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums">
+                        + R$ {profit.toFixed(2).replace(".", ",")}
+                      </p>
                     </div>
                   </div>
 
