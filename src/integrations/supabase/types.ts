@@ -284,6 +284,13 @@ export type Database = {
     }
     Functions: {
       generate_referral_code: { Args: never; Returns: string }
+      get_my_referral_summary: {
+        Args: never
+        Returns: {
+          total_bonus: number
+          total_referrals: number
+        }[]
+      }
       get_profile_referral_code: { Args: { _user_id: string }; Returns: string }
       get_profile_referred_by: { Args: { _user_id: string }; Returns: string }
       get_user_balance: { Args: { _user_id: string }; Returns: number }
