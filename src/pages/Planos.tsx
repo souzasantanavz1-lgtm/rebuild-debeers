@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { TrendingUp, Clock } from "lucide-react";
+import { TrendingUp, Clock, Target, DollarSign, ShoppingBag } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,18 +7,29 @@ import { useToast } from "@/hooks/use-toast";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import planBruto from "@/assets/plan-bruto.jpg";
-import planLapidado from "@/assets/plan-lapidado.jpg";
-import planMina from "@/assets/plan-mina.jpg";
-import planCofre from "@/assets/plan-cofre.jpg";
-import planTesouro from "@/assets/plan-tesouro.jpg";
+import planCarregadeira from "@/assets/plan-carregadeira.jpg";
+import planPerfuracao from "@/assets/plan-perfuracao.jpg";
+import planCaminhao from "@/assets/plan-caminhao.jpg";
+import planJumbo from "@/assets/plan-jumbo.jpg";
+import planContinua from "@/assets/plan-continua.jpg";
+import planMoinho from "@/assets/plan-moinho.jpg";
 
 const IMG: Record<string, string> = {
-  "diamante-bruto": planBruto,
-  "diamante-lapidado": planLapidado,
-  "mina-diamantes": planMina,
-  "cofre-diamantes": planCofre,
-  "tesouro-real": planTesouro,
+  "carregadeira-subterranea": planCarregadeira,
+  "perfuracao-pocos": planPerfuracao,
+  "caminhao-mineracao": planCaminhao,
+  "perfuratriz-jumbo": planJumbo,
+  "mineracao-continua": planContinua,
+  "moinho-bolas-premium": planMoinho,
+};
+
+const ICON: Record<string, string> = {
+  "carregadeira-subterranea": "⛏️",
+  "perfuracao-pocos": "🛠️",
+  "caminhao-mineracao": "🚛",
+  "perfuratriz-jumbo": "⚡",
+  "mineracao-continua": "🏗️",
+  "moinho-bolas-premium": "⚙️",
 };
 
 type Plan = {
@@ -29,6 +40,7 @@ type Plan = {
   price: number;
   daily_return: number;
   duration_days: number;
+  purchase_limit: number;
 };
 
 const Planos = () => {
@@ -38,11 +50,23 @@ const Planos = () => {
   const [balance, setBalance] = useState(0);
 
   useEffect(() => {
-    supabase.from("investment_plans").select("*").eq("is_active", true).order("sort_order")
-      .then(({ data }) => { if (data) setPlans(data as Plan[]); });
+    supabase
+      .from("investment_plans")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order")
+      .then(({ data }) => {
+        if (data) setPlans(data as Plan[]);
+      });
     if (user) {
-      supabase.from("profiles").select("balance").eq("user_id", user.id).single()
-        .then(({ data }) => { if (data) setBalance(Number(data.balance)); });
+      supabase
+        .from("profiles")
+        .select("balance")
+        .eq("user_id", user.id)
+        .single()
+        .then(({ data }) => {
+          if (data) setBalance(Number(data.balance));
+        });
     }
   }, [user]);
 
@@ -69,9 +93,9 @@ const Planos = () => {
       </header>
 
       <div className="px-4 mt-4">
-        <h2 className="text-lg font-semibold text-primary mb-1">Planos de Investimento</h2>
+        <h2 className="text-lg font-semibold text-primary mb-1">Planos de Mineração</h2>
         <p className="text-xs text-muted-foreground mb-4">
-          Escolha um plano e receba rendimentos diários por 30 dias.
+          Escolha um equipamento e receba rendimentos diários fixos.
         </p>
 
         <div className="space-y-4">
@@ -79,65 +103,76 @@ const Planos = () => {
             const price = Number(p.price);
             const daily = Number(p.daily_return);
             const days = Number(p.duration_days);
-            const totalReturn = daily * days;                    // total recebido ao longo do plano
-            const profit = totalReturn - price;                  // lucro líquido
+            const totalReturn = daily * days;
+            const profit = totalReturn - price;
             const profitPct = price > 0 ? (profit / price) * 100 : 0;
-            const isFeatured = p.price === Math.max(...plans.map((x) => Number(x.price)));
             return (
-              <Card key={p.id} className={`overflow-hidden relative ${isFeatured ? "ring-2 ring-primary shadow-lg" : ""}`}>
-                {isFeatured && (
-                  <div className="absolute top-3 right-3 z-10 bg-gradient-to-r from-amber-400 to-amber-600 text-white text-[10px] font-bold tracking-widest px-3 py-1 rounded-full shadow-md uppercase">
-                    ★ Indicado
-                  </div>
-                )}
+              <Card key={p.id} className="overflow-hidden">
                 <img
-                  src={IMG[p.slug] || planLapidado}
+                  src={IMG[p.slug]}
                   alt={p.name}
                   loading="lazy"
-                  width={768}
-                  height={512}
-                  className="w-full h-40 object-cover"
+                  width={1024}
+                  height={1024}
+                  className="w-full h-44 object-cover"
                 />
                 <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h3 className="font-semibold text-primary text-base">{p.name}</h3>
-                      <p className="text-xs text-muted-foreground">{p.description}</p>
-                    </div>
-                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
-                      Lucro +{profitPct.toFixed(0)}%
-                    </Badge>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xl">{ICON[p.slug]}</span>
+                    <h3 className="font-semibold text-primary text-base">{p.name}</h3>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 my-3 text-center">
-                    <div className="bg-secondary rounded-md p-2">
-                      <p className="text-[10px] text-muted-foreground">Investimento</p>
-                      <p className="text-sm font-bold tabular-nums">R$ {price.toFixed(0)}</p>
-                    </div>
-                    <div className="bg-secondary rounded-md p-2">
-                      <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1"><TrendingUp className="h-3 w-3" />Diário</p>
-                      <p className="text-sm font-bold text-emerald-600 tabular-nums">R$ {daily.toFixed(2).replace(".", ",")}</p>
-                    </div>
-                    <div className="bg-secondary rounded-md p-2">
-                      <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1"><Clock className="h-3 w-3" />Prazo</p>
-                      <p className="text-sm font-bold tabular-nums">{days}d</p>
-                    </div>
+                  <div className="rounded-lg bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900 p-3 mb-2 flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Investimento</span>
+                    <span className="text-lg font-bold text-rose-700 dark:text-rose-300 tabular-nums">
+                      R$ {price.toFixed(2)}
+                    </span>
                   </div>
 
-                  <div className="rounded-md border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/30 p-2.5 mb-3 grid grid-cols-2 text-center">
-                    <div>
-                      <p className="text-[10px] text-muted-foreground">Total recebido</p>
-                      <p className="text-sm font-bold tabular-nums">R$ {totalReturn.toFixed(2).replace(".", ",")}</p>
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900 p-3">
+                      <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                        <TrendingUp className="h-3 w-3" /> Lucro/dia
+                      </p>
+                      <p className="text-base font-bold text-amber-700 dark:text-amber-300 tabular-nums">
+                        R$ {daily.toFixed(2)}
+                      </p>
                     </div>
-                    <div className="border-l border-emerald-200 dark:border-emerald-900">
-                      <p className="text-[10px] text-muted-foreground">Lucro líquido</p>
-                      <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums">
-                        + R$ {profit.toFixed(2).replace(".", ",")}
+                    <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900 p-3">
+                      <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> Ciclo
+                      </p>
+                      <p className="text-base font-bold text-amber-700 dark:text-amber-300 tabular-nums">
+                        {days} dias
                       </p>
                     </div>
                   </div>
 
-                  <Button onClick={() => invest(p)} className="w-full">Investir agora</Button>
+                  <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900 p-2.5 mb-2 flex items-center justify-center gap-2">
+                    <DollarSign className="h-4 w-4 text-amber-600" />
+                    <span className="text-sm text-primary">
+                      Limite: <span className="font-semibold">{p.purchase_limit}</span>{" "}
+                      {p.purchase_limit === 1 ? "compra" : "compras"} por usuário
+                    </span>
+                  </div>
+
+                  <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 p-3 mb-3 flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Target className="h-4 w-4 text-amber-600" /> Retorno Total
+                    </span>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-amber-700 dark:text-amber-300 tabular-nums">
+                        R$ {totalReturn.toFixed(2)}
+                      </p>
+                      <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200 text-[10px]">
+                        +{profitPct.toFixed(0)}% de lucro
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <Button onClick={() => invest(p)} className="w-full h-11 text-base font-semibold">
+                    <ShoppingBag className="mr-2 h-4 w-4" /> Investir Agora
+                  </Button>
                 </CardContent>
               </Card>
             );

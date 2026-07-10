@@ -79,6 +79,7 @@ export type Database = {
           is_active: boolean
           name: string
           price: number
+          purchase_limit: number
           slug: string
           sort_order: number
         }
@@ -92,6 +93,7 @@ export type Database = {
           is_active?: boolean
           name: string
           price: number
+          purchase_limit?: number
           slug: string
           sort_order?: number
         }
@@ -105,6 +107,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           price?: number
+          purchase_limit?: number
           slug?: string
           sort_order?: number
         }
