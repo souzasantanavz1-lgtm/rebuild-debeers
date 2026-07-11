@@ -93,9 +93,9 @@ const Planos = () => {
       </header>
 
       <div className="px-4 mt-4">
-        <h2 className="text-lg font-semibold text-primary mb-1">Planos de Mineração</h2>
+        <h2 className="text-lg font-semibold text-primary mb-1">Coleção De Beers</h2>
         <p className="text-xs text-muted-foreground mb-4">
-          Escolha um equipamento e receba rendimentos diários fixos.
+          Escolha um diamante e receba rendimentos diários fixos.
         </p>
 
         <div className="space-y-4">
