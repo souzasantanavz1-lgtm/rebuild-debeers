@@ -7,29 +7,29 @@ import { useToast } from "@/hooks/use-toast";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import planCarregadeira from "@/assets/plan-carregadeira.jpg";
-import planPerfuracao from "@/assets/plan-perfuracao.jpg";
-import planCaminhao from "@/assets/plan-caminhao.jpg";
-import planJumbo from "@/assets/plan-jumbo.jpg";
-import planContinua from "@/assets/plan-continua.jpg";
-import planMoinho from "@/assets/plan-moinho.jpg";
+import planBruto from "@/assets/plan-bruto.jpg";
+import planLapidado from "@/assets/plan-lapidado.jpg";
+import planSolitario from "@/assets/plan-solitario.jpg";
+import planRoyal from "@/assets/plan-royal.jpg";
+import planImperial from "@/assets/plan-imperial.jpg";
+import planEternity from "@/assets/plan-eternity.jpg";
 
 const IMG: Record<string, string> = {
-  "carregadeira-subterranea": planCarregadeira,
-  "perfuracao-pocos": planPerfuracao,
-  "caminhao-mineracao": planCaminhao,
-  "perfuratriz-jumbo": planJumbo,
-  "mineracao-continua": planContinua,
-  "moinho-bolas-premium": planMoinho,
+  "diamante-bruto": planBruto,
+  "diamante-lapidado": planLapidado,
+  "diamante-solitario": planSolitario,
+  "diamante-royal": planRoyal,
+  "diamante-imperial": planImperial,
+  "diamante-eternity": planEternity,
 };
 
 const ICON: Record<string, string> = {
-  "carregadeira-subterranea": "⛏️",
-  "perfuracao-pocos": "🛠️",
-  "caminhao-mineracao": "🚛",
-  "perfuratriz-jumbo": "⚡",
-  "mineracao-continua": "🏗️",
-  "moinho-bolas-premium": "⚙️",
+  "diamante-bruto": "💎",
+  "diamante-lapidado": "✨",
+  "diamante-solitario": "💍",
+  "diamante-royal": "👑",
+  "diamante-imperial": "🔱",
+  "diamante-eternity": "🌟",
 };
 
 type Plan = {
