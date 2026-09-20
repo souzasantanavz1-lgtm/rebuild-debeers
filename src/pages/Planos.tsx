@@ -113,7 +113,7 @@ const Planos = () => {
                   alt={p.name}
                   loading="lazy"
                   width={1024}
-                  height={1024}
+                  height={768}
                   className="w-full h-44 object-cover"
                 />
                 <CardContent className="p-4">

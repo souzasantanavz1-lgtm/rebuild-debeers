@@ -17,7 +17,9 @@ type Deposit = {
   created_at: string;
 };
 
-const PRESETS = [50, 100, 200, 500, 1000, 5000];
+const MINIMUM_DEPOSIT = 20;
+const MAXIMUM_DEPOSIT = 50000;
+const PRESETS = [20, 50, 100, 200, 500, 1000];
 
 const Deposito = () => {
   const { user } = useAuth();
@@ -45,11 +47,11 @@ const Deposito = () => {
 
   const handleDeposit = async () => {
     const value = Number(amount);
-    if (!value || value < 50) {
-      toast({ title: "Valor inválido", description: "Mínimo de R$ 50,00", variant: "destructive" });
+    if (!Number.isFinite(value) || value < MINIMUM_DEPOSIT) {
+      toast({ title: "Valor inválido", description: "Mínimo de R$ 20,00", variant: "destructive" });
       return;
     }
-    if (value > 50000) {
+    if (value > MAXIMUM_DEPOSIT) {
       toast({ title: "Valor inválido", description: "Máximo de R$ 50.000,00", variant: "destructive" });
       return;
     }
@@ -92,13 +94,13 @@ const Deposito = () => {
               <h2 className="text-lg font-semibold text-primary">Depósito via PIX</h2>
             </div>
 
-            <Label htmlFor="amount" className="text-sm">Valor (R$ 50 — R$ 50.000)</Label>
+            <Label htmlFor="amount" className="text-sm">Valor (R$ 20 — R$ 50.000)</Label>
             <Input
               id="amount"
               type="number"
               inputMode="decimal"
-              min={50}
-              max={50000}
+              min={MINIMUM_DEPOSIT}
+              max={MAXIMUM_DEPOSIT}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0,00"
@@ -107,13 +109,15 @@ const Deposito = () => {
 
             <div className="grid grid-cols-3 gap-2 mt-3">
               {PRESETS.map((v) => (
-                <button
+                <Button
                   key={v}
+                  type="button"
+                  variant="outline"
                   onClick={() => setAmount(String(v))}
-                  className="py-2 rounded-md border border-border text-sm font-medium hover:bg-secondary transition-colors"
+                  className="h-10 text-sm font-medium"
                 >
                   R$ {v}
-                </button>
+                </Button>
               ))}
             </div>
 

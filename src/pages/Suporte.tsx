@@ -13,9 +13,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 const FAQ = [
-  { q: "Como faço um depósito?", a: "Acesse a aba Depósito, escolha o valor (mínimo R$ 50) e gere o código PIX. O saldo é creditado após a confirmação." },
+  { q: "Como faço um depósito?", a: "Acesse a aba Depósito, escolha o valor (mínimo R$ 20) e gere o código PIX. O saldo é creditado após a confirmação." },
   { q: "Qual a taxa de saque?", a: "12% sobre o valor solicitado. Você recebe 88% líquidos via PIX em até 24h úteis." },
-  { q: "Como funciona o check-in diário?", a: "Toque em 'Check-in' no painel inicial uma vez por dia e ganhe R$ 1,00 de bônus direto no saldo." },
+  { q: "Como funciona o check-in diário?", a: "Toque em 'Check-in' no painel inicial uma vez por dia e ganhe R$ 0,50 de bônus direto no saldo." },
   { q: "Como ganho com indicações?", a: "Compartilhe seu código de indicação. A cada amigo que investir, você recebe bônus." },
   { q: "Meu saque foi rejeitado, e agora?", a: "Confira CPF e chave PIX cadastrados. Se persistir, abra um chamado abaixo." },
 ];
