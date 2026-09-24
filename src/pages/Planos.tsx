@@ -24,12 +24,12 @@ const IMG: Record<string, string> = {
 };
 
 const ICON: Record<string, string> = {
-  "diamante-bruto": "💎",
-  "diamante-lapidado": "🎁",
+  "diamante-bruto": "📦",
+  "diamante-lapidado": "🧰",
   "diamante-solitario": "🚛",
-  "diamante-royal": "🏦",
+  "diamante-royal": "🔐",
   "diamante-imperial": "⛰️",
-  "diamante-eternity": "👑",
+  "diamante-eternity": "🏭",
 };
 
 type Plan = {
