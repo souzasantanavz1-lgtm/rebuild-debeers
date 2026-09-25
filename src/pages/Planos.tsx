@@ -9,17 +9,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import planBruto from "@/assets/plan-bruto.jpg";
 import planLapidado from "@/assets/plan-lapidado.jpg";
-import planSolitario from "@/assets/plan-solitario.jpg";
-import planRoyal from "@/assets/plan-royal.jpg";
-import planImperial from "@/assets/plan-imperial.jpg";
+import planCaminhao from "@/assets/plan-caminhao.jpg";
+import planCofre from "@/assets/plan-cofre.jpg";
+import planMina from "@/assets/plan-mina.jpg";
 import planEternity from "@/assets/plan-eternity.jpg";
 
 const IMG: Record<string, string> = {
   "diamante-bruto": planBruto,
   "diamante-lapidado": planLapidado,
-  "diamante-solitario": planSolitario,
-  "diamante-royal": planRoyal,
-  "diamante-imperial": planImperial,
+  "diamante-solitario": planCaminhao,
+  "diamante-royal": planCofre,
+  "diamante-imperial": planMina,
   "diamante-eternity": planEternity,
 };
 
@@ -109,7 +109,7 @@ const Planos = () => {
             return (
               <Card key={p.id} className="overflow-hidden">
                 <img
-                  src={IMG[p.slug]}
+                  src={IMG[p.slug] || planBruto}
                   alt={p.name}
                   loading="lazy"
                   width={1024}
