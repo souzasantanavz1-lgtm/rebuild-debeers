@@ -14,7 +14,7 @@ const actions = [
   { icon: CreditCard, label: "Depósito", path: "/deposito" },
   { icon: Banknote, label: "Saque", path: "/saque" },
   { icon: LayoutGrid, label: "Planos", path: "/planos" },
-  { icon: Users, label: "Indicação", path: null, action: "indicacao" },
+  { icon: Users, label: "Indicação", path: "/indicacao" },
   { icon: HelpCircle, label: "Suporte", path: "/suporte" },
 ];
 
@@ -126,11 +126,6 @@ const Dashboard = () => {
                   onClick={() => {
                     if (action.path) {
                       navigate(action.path);
-                    } else if (action.action === "indicacao") {
-                      toast({
-                        title: "Código de Indicação",
-                        description: `Seu código: ${profile?.referral_code || "Carregando..."}`,
-                      });
                     }
                   }}
                   className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:bg-secondary transition-colors"
