@@ -5,3 +5,7 @@
 - [x] Renomear os seis planos com uma progressão criativa ligada a diamantes
 - [x] Executar pentest defensivo no frontend, dependências e Lovable Cloud
 - [x] Corrigir vulnerabilidades confirmadas sem alterar valores, retornos ou prazos
+- [ ] Aplicar as seis imagens enviadas aos planos na ordem informada
+- [ ] Criar a página Indicação integrada à navegação
+- [ ] Ajustar retornos dos planos após definição dos novos valores
+- [ ] Destacar de forma transparente o melhor retorno de curto prazo
