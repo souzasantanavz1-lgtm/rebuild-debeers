@@ -14,6 +14,7 @@ import Saque from "./pages/Saque";
 import Planos from "./pages/Planos";
 import Suporte from "./pages/Suporte";
 import CheckIn from "./pages/CheckIn";
+import Indicacao from "./pages/Indicacao";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/deposito" element={<ProtectedRoute><Deposito /></ProtectedRoute>} />
             <Route path="/saque" element={<ProtectedRoute><Saque /></ProtectedRoute>} />
             <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
+            <Route path="/indicacao" element={<ProtectedRoute><Indicacao /></ProtectedRoute>} />
             <Route path="/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
             <Route path="/checkin" element={<ProtectedRoute><CheckIn /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
