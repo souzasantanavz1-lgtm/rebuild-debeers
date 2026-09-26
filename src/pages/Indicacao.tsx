@@ -1,174 +1,120 @@
-import { useState, useEffect } from "react";
-import { Users, Copy, Share2, Award, TrendingUp, Info } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { Copy, Share2, Users, Gift, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+
+type ReferralSummary = { total_referrals: number; total_bonus: number };
+const money = (amount: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(amount);
 
 const Indicacao = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [profile, setProfile] = useState<{ referral_code: string | null } | null>(null);
-  const [summary, setSummary] = useState({ total_referrals: 0, total_bonus: 0 });
+  const [code, setCode] = useState<string | null>(null);
+  const [summary, setSummary] = useState<ReferralSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      // Get profile for referral code
-      supabase
-        .from("profiles")
-        .select("referral_code")
-        .eq("user_id", user.id)
-        .single()
-        .then(({ data }) => {
-          if (data) setProfile(data);
-        });
-
-      // Get referral summary
-      supabase
-        .rpc("get_my_referral_summary")
-        .then(({ data, error }) => {
-          if (!error && data && data.length > 0) {
-            setSummary(data[0]);
-          }
-        });
-    }
+    if (!user) return;
+    let active = true;
+    setLoading(true);
+    Promise.all([
+      supabase.from("profiles").select("referral_code").eq("user_id", user.id).single(),
+      supabase.rpc("get_my_referral_summary"),
+    ]).then(([profile, referrals]) => {
+      if (!active) return;
+      if (profile.error || referrals.error || !profile.data?.referral_code) {
+        setError(true);
+      } else {
+        setCode(profile.data.referral_code);
+        setSummary(referrals.data?.[0] ?? { total_referrals: 0, total_bonus: 0 });
+        setError(false);
+      }
+      setLoading(false);
+    }).catch(() => {
+      if (active) { setError(true); setLoading(false); }
+    });
+    return () => { active = false; };
   }, [user]);
 
-  const referralCode = profile?.referral_code || "...";
-  const referralLink = `${window.location.origin}/register?ref=${referralCode}`;
+  const link = code ? `${window.location.origin}/register?ref=${encodeURIComponent(code)}` : null;
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Copiado!",
-      description: `${label} copiado para a área de transferência.`,
-    });
+  const copy = async (value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast({ title: "Copiado para a área de transferência" });
+    } catch {
+      toast({ title: "Não foi possível copiar", variant: "destructive" });
+    }
+  };
+
+  const share = async () => {
+    if (!link) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Convite De Beers", url: link });
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        toast({ title: "Não foi possível compartilhar", variant: "destructive" });
+      }
+    } else {
+      await copy(link);
+    }
   };
 
   return (
     <div className="min-h-screen bg-muted pb-24">
-      <header className="bg-primary text-primary-foreground px-4 py-4">
-        <h1 className="text-xl font-serif tracking-wider">DE BEERS</h1>
-        <p className="text-[10px] tracking-[0.3em] opacity-80">PROGRAMA DE AFILIADOS</p>
+      <header className="bg-primary px-4 py-5 text-primary-foreground">
+        <h1 className="text-xl font-serif">DE BEERS</h1>
+        <p className="text-xs opacity-80">Indicação</p>
       </header>
+      <main className="mx-auto max-w-lg px-4 py-6 space-y-8">
+        <section aria-labelledby="invite-heading">
+          <h2 id="invite-heading" className="text-xl font-semibold text-foreground">Convide alguém</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Envie seu código ou link para a pessoa usar ao criar a conta.</p>
+          {loading && <p role="status" className="py-6 text-sm text-muted-foreground">Carregando seu convite...</p>}
+          {error && <p role="alert" className="mt-4 flex items-center gap-2 text-sm text-destructive"><AlertCircle className="h-4 w-4" />Não foi possível carregar seus dados. Reabra a página para tentar novamente.</p>}
+          {code && !error && (
+            <div className="mt-5 space-y-4">
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Seu código</p>
+                <div className="flex items-center gap-2 border-b border-border pb-3">
+                  <strong className="flex-1 font-mono text-2xl tracking-widest text-primary">{code}</strong>
+                  <Button size="icon" variant="outline" onClick={() => copy(code)} aria-label="Copiar código" title="Copiar código"><Copy className="h-4 w-4" /></Button>
+                </div>
+              </div>
+              {link && <div>
+                <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Link de convite</p>
+                <div className="flex items-center gap-2 border-b border-border pb-3">
+                  <p className="min-w-0 flex-1 truncate text-sm text-foreground" title={link}>{link}</p>
+                  <Button size="icon" variant="outline" onClick={() => copy(link)} aria-label="Copiar link" title="Copiar link"><Copy className="h-4 w-4" /></Button>
+                  <Button size="icon" onClick={share} aria-label="Compartilhar convite" title="Compartilhar convite"><Share2 className="h-4 w-4" /></Button>
+                </div>
+              </div>}
+            </div>
+          )}
+        </section>
 
-      <div className="px-4 mt-6 space-y-4">
-        {/* Referral Card */}
-        <Card className="border-primary/20 overflow-hidden">
-          <div className="bg-primary/5 p-4 border-b border-primary/10">
-            <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Convide e Ganhe
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Compartilhe seu link e ganhe comissões sobre os investimentos de seus indicados.
-            </p>
+        <section aria-labelledby="numbers-heading" className="border-t border-border pt-6">
+          <h2 id="numbers-heading" className="mb-4 text-lg font-semibold text-foreground">Suas indicações</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="border-l-2 border-primary pl-4">
+              <Users className="mb-2 h-5 w-5 text-primary" />
+              <p className="text-2xl font-bold tabular-nums">{summary?.total_referrals ?? "—"}</p>
+              <p className="text-xs text-muted-foreground">Pessoas cadastradas</p>
+            </div>
+            <div className="border-l-2 border-primary pl-4">
+              <Gift className="mb-2 h-5 w-5 text-primary" />
+              <p className="text-2xl font-bold tabular-nums">{summary ? money(Number(summary.total_bonus)) : "—"}</p>
+              <p className="text-xs text-muted-foreground">Bônus registrados</p>
+            </div>
           </div>
-          <CardContent className="p-4 space-y-4">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 block">
-                Seu Código
-              </label>
-              <div className="flex gap-2">
-                <div className="flex-1 bg-muted rounded-lg border border-input px-3 py-2 font-mono text-sm flex items-center">
-                  {referralCode}
-                </div>
-                <Button variant="outline" size="icon" onClick={() => copyToClipboard(referralCode, "Código")}>
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 block">
-                Link de Convite
-              </label>
-              <div className="flex gap-2">
-                <div className="flex-1 bg-muted rounded-lg border border-input px-3 py-2 text-sm flex items-center truncate">
-                  {referralLink}
-                </div>
-                <Button variant="outline" size="icon" onClick={() => copyToClipboard(referralLink, "Link")}>
-                  <Share2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Stats Summary */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-xs text-muted-foreground mb-1">Total Indicados</p>
-              <p className="text-2xl font-bold text-primary">{summary.total_referrals}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-xs text-muted-foreground mb-1">Bônus Acumulado</p>
-              <p className="text-2xl font-bold text-emerald-600">R$ {Number(summary.total_bonus).toFixed(2)}</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Commission Rules */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Award className="h-5 w-5 text-amber-500" />
-              Níveis de Comissão
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <p className="text-xs font-bold uppercase text-muted-foreground">Primeira Compra</p>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
-                    <span className="text-sm font-medium">Nível 1</span>
-                    <span className="text-sm font-bold text-amber-700 dark:text-amber-400">15%</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
-                    <span className="text-sm font-medium">Nível 2</span>
-                    <span className="text-sm font-bold text-blue-700 dark:text-blue-400">2%</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-rose-50 dark:bg-rose-900/20 p-2 rounded">
-                    <span className="text-sm font-medium">Nível 3</span>
-                    <span className="text-sm font-bold text-rose-700 dark:text-rose-400">1%</span>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <p className="text-xs font-bold uppercase text-muted-foreground">Recompras</p>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center bg-amber-50/50 dark:bg-amber-900/10 p-2 rounded">
-                    <span className="text-sm font-medium">Nível 1</span>
-                    <span className="text-sm font-bold text-amber-600/80">8%</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-blue-50/50 dark:bg-blue-900/10 p-2 rounded">
-                    <span className="text-sm font-medium">Nível 2</span>
-                    <span className="text-sm font-bold text-blue-600/80">1%</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-rose-50/50 dark:bg-rose-900/10 p-2 rounded">
-                    <span className="text-sm font-medium">Nível 3</span>
-                    <span className="text-sm font-bold text-rose-600/80">1%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex gap-2 items-start bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
-              <Info className="h-4 w-4 text-blue-500 mt-0.5" />
-              <p className="text-[11px] text-blue-700 dark:text-blue-300">
-                Os bônus de indicação são creditados instantaneamente no seu saldo assim que seu convidado realiza um investimento.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
+          <p className="mt-5 text-xs text-muted-foreground">Os valores exibidos são os bônus registrados na sua conta. Indicar alguém não gera crédito automático.</p>
+        </section>
+      </main>
       <BottomNav />
     </div>
   );
