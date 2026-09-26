@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link, useNavigate, Navigate } from "react-router-dom";
+import { Link, useNavigate, Navigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +19,8 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const inviteCode = searchParams.get("ref")?.trim().toUpperCase() ?? "";
   const { user, loading } = useAuth();
 
   const {
@@ -31,7 +33,7 @@ const Register = () => {
       name: "",
       email: "",
       phone: "",
-      referralCode: "",
+      referralCode: /^[A-Z0-9]{8}$/.test(inviteCode) ? inviteCode : "",
       password: "",
       passwordConfirmation: "",
     },
@@ -60,6 +62,7 @@ const Register = () => {
           data: {
             name: data.name,
             phone: data.phone || "",
+            referral_code: data.referralCode?.trim().toUpperCase() || "",
           },
         },
       });

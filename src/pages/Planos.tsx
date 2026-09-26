@@ -7,20 +7,20 @@ import { useToast } from "@/hooks/use-toast";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import planBruto from "@/assets/plan-bruto.jpg";
-import planLapidado from "@/assets/plan-lapidado.jpg";
-import planCaminhao from "@/assets/plan-caminhao.jpg";
-import planCofre from "@/assets/plan-cofre.jpg";
-import planMina from "@/assets/plan-mina.jpg";
-import planEternity from "@/assets/plan-eternity.jpg";
+import planBruto from "@/assets/plano-pacote-diamantes.png.asset.json";
+import planLapidado from "@/assets/plano-bau-diamantes.webp.asset.json";
+import planCaminhao from "@/assets/plano-carreta-diamantes.webp.asset.json";
+import planCofre from "@/assets/plano-cofre-diamantes.webp.asset.json";
+import planMina from "@/assets/plano-mina-diamantes.webp.asset.json";
+import planEternity from "@/assets/plano-imperio-diamantes.webp.asset.json";
 
 const IMG: Record<string, string> = {
-  "diamante-bruto": planBruto,
-  "diamante-lapidado": planLapidado,
-  "diamante-solitario": planCaminhao,
-  "diamante-royal": planCofre,
-  "diamante-imperial": planMina,
-  "diamante-eternity": planEternity,
+  "diamante-bruto": planBruto.url,
+  "diamante-lapidado": planLapidado.url,
+  "diamante-solitario": planCaminhao.url,
+  "diamante-royal": planCofre.url,
+  "diamante-imperial": planMina.url,
+  "diamante-eternity": planEternity.url,
 };
 
 const ICON: Record<string, string> = {
@@ -48,6 +48,7 @@ const Planos = () => {
   const { toast } = useToast();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [balance, setBalance] = useState(0);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     supabase
@@ -55,8 +56,9 @@ const Planos = () => {
       .select("*")
       .eq("is_active", true)
       .order("sort_order")
-      .then(({ data }) => {
-        if (data) setPlans(data as Plan[]);
+      .then(({ data, error }) => {
+        if (error) setLoadError(true);
+        else if (data) setPlans(data as Plan[]);
       });
     if (user) {
       supabase
@@ -85,6 +87,16 @@ const Planos = () => {
     });
   };
 
+  // Comparação proporcional: lucro total / valor investido, entre ciclos de até 7 dias.
+  const shortPlans = plans.filter((p) => p.duration_days <= 7 && Number(p.price) > 0);
+  const bestShortPlan = shortPlans.reduce<Plan | null>((best, plan) => {
+    const rate = (Number(plan.daily_return) * plan.duration_days - Number(plan.price)) / Number(plan.price);
+    const bestRate = best
+      ? (Number(best.daily_return) * best.duration_days - Number(best.price)) / Number(best.price)
+      : -Infinity;
+    return rate > bestRate ? plan : best;
+  }, null);
+
   return (
     <div className="min-h-screen bg-muted pb-24">
       <header className="bg-primary text-primary-foreground px-4 py-4">
@@ -95,7 +107,7 @@ const Planos = () => {
       <div className="px-4 mt-4">
         <h2 className="text-lg font-semibold text-primary mb-1">Coleção De Beers</h2>
         <p className="text-xs text-muted-foreground mb-4">
-          Escolha um diamante e receba rendimentos diários fixos.
+          Compare investimento, retorno projetado e prazo de cada plano.
         </p>
 
         <div className="space-y-4">
@@ -107,16 +119,22 @@ const Planos = () => {
             const profit = totalReturn - price;
             const profitPct = price > 0 ? (profit / price) * 100 : 0;
             return (
-              <Card key={p.id} className="overflow-hidden">
+              <Card key={p.id} className={`overflow-hidden ${p.id === bestShortPlan?.id ? "border-primary ring-1 ring-primary/30" : ""}`}>
                 <img
-                  src={IMG[p.slug] || planBruto}
+                  src={IMG[p.slug] || planBruto.url}
                   alt={p.name}
-                  loading="lazy"
+                  loading={p.slug === "diamante-bruto" ? "eager" : "lazy"}
                   width={1024}
                   height={768}
                   className="w-full h-44 object-cover"
                 />
                 <CardContent className="p-4">
+                  {p.id === bestShortPlan?.id && (
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      <Badge className="bg-primary text-primary-foreground">Melhor retorno percentual em até 7 dias</Badge>
+                      <span className="text-xs text-muted-foreground">Comparação entre os planos desta página</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-xl">{ICON[p.slug]}</span>
                     <h3 className="font-semibold text-primary text-base">{p.name}</h3>
@@ -132,7 +150,7 @@ const Planos = () => {
                   <div className="grid grid-cols-2 gap-2 mb-2">
                     <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900 p-3">
                       <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-                        <TrendingUp className="h-3 w-3" /> Lucro/dia
+                        <TrendingUp className="h-3 w-3" /> Retorno/dia
                       </p>
                       <p className="text-base font-bold text-amber-700 dark:text-amber-300 tabular-nums">
                         R$ {daily.toFixed(2)}
@@ -158,14 +176,14 @@ const Planos = () => {
 
                   <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 p-3 mb-3 flex items-center justify-between">
                     <span className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Target className="h-4 w-4 text-amber-600" /> Retorno Total
+                      <Target className="h-4 w-4 text-amber-600" /> Retorno projetado
                     </span>
                     <div className="text-right">
                       <p className="text-lg font-bold text-amber-700 dark:text-amber-300 tabular-nums">
                         R$ {totalReturn.toFixed(2)}
                       </p>
-                      <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200 text-[10px]">
-                        +{profitPct.toFixed(0)}% de lucro
+                        <Badge variant="secondary" className="text-[10px]">
+                          {profitPct >= 0 ? "+" : ""}{profitPct.toFixed(1)}% sobre o investido
                       </Badge>
                     </div>
                   </div>
@@ -177,7 +195,8 @@ const Planos = () => {
               </Card>
             );
           })}
-          {plans.length === 0 && (
+          {loadError && <p className="text-sm text-destructive text-center py-8">Não foi possível carregar os planos. Tente novamente.</p>}
+          {!loadError && plans.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-8">Carregando planos...</p>
           )}
         </div>
