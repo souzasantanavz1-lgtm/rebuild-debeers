@@ -7,20 +7,20 @@ import { useToast } from "@/hooks/use-toast";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import planBruto from "@/assets/plano-pacote-diamantes.png.asset.json";
-import planLapidado from "@/assets/plano-bau-diamantes.webp.asset.json";
-import planCaminhao from "@/assets/plano-carreta-diamantes.webp.asset.json";
-import planCofre from "@/assets/plano-cofre-diamantes.webp.asset.json";
-import planMina from "@/assets/plano-mina-diamantes.webp.asset.json";
-import planEternity from "@/assets/plano-imperio-diamantes.webp.asset.json";
+import planBruto from "@/assets/plano-pacote-original.jpg";
+import planLapidado from "@/assets/plano-bau-original.jpg";
+import planCaminhao from "@/assets/plano-carreta-original.jpg";
+import planCofre from "@/assets/plano-cofre-original.jpg";
+import planMina from "@/assets/plano-mina-original.jpg";
+import planEternity from "@/assets/plano-imperio-original.jpg";
 
 const IMG: Record<string, string> = {
-  "diamante-bruto": planBruto.url,
-  "diamante-lapidado": planLapidado.url,
-  "diamante-solitario": planCaminhao.url,
-  "diamante-royal": planCofre.url,
-  "diamante-imperial": planMina.url,
-  "diamante-eternity": planEternity.url,
+  "diamante-bruto": planBruto,
+  "diamante-lapidado": planLapidado,
+  "diamante-solitario": planCaminhao,
+  "diamante-royal": planCofre,
+  "diamante-imperial": planMina,
+  "diamante-eternity": planEternity,
 };
 
 const ICON: Record<string, string> = {
@@ -121,11 +121,11 @@ const Planos = () => {
             return (
               <Card key={p.id} className={`overflow-hidden ${p.id === bestShortPlan?.id ? "border-primary ring-1 ring-primary/30" : ""}`}>
                 <img
-                  src={IMG[p.slug] || planBruto.url}
+                  src={IMG[p.slug] || planBruto}
                   alt={p.name}
                   loading={p.slug === "diamante-bruto" ? "eager" : "lazy"}
-                  width={1024}
-                  height={768}
+                  width={1280}
+                  height={960}
                   className="w-full h-44 object-cover"
                 />
                 <CardContent className="p-4">
