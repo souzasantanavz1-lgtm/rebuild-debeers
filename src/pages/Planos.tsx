@@ -23,6 +23,9 @@ const IMG: Record<string, string> = {
   "diamante-eternity": planEternity.url,
 };
 
+// O servidor local não encaminha caminhos /__l5e/assets-v1; o domínio publicado entrega os mesmos assets.
+const assetUrl = (path: string) => `https://redebeers-love.lovable.app${path}`;
+
 const ICON: Record<string, string> = {
   "diamante-bruto": "📦",
   "diamante-lapidado": "🧰",
@@ -121,7 +124,7 @@ const Planos = () => {
             return (
               <Card key={p.id} className={`overflow-hidden ${p.id === bestShortPlan?.id ? "border-primary ring-1 ring-primary/30" : ""}`}>
                 <img
-                  src={IMG[p.slug] || planBruto.url}
+                  src={assetUrl(IMG[p.slug] || planBruto.url)}
                   alt={p.name}
                   loading={p.slug === "diamante-bruto" ? "eager" : "lazy"}
                   width={1280}
