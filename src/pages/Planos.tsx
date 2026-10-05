@@ -87,12 +87,8 @@ const Planos = () => {
     });
   };
 
-  // Melhor custo-benefício entre a metade mais acessível dos planos.
-  const affordablePlans = [...plans]
-    .filter((p) => Number(p.price) > 0)
-    .sort((a, b) => Number(a.price) - Number(b.price))
-    .slice(0, Math.ceil(plans.length / 2));
-  const bestValuePlan = affordablePlans.reduce<Plan | null>((best, plan) => {
+  // Melhor custo-benefício: maior retorno percentual entre todos os planos.
+  const bestValuePlan = plans.filter((p) => Number(p.price) > 0).reduce<Plan | null>((best, plan) => {
     const rate = (Number(plan.daily_return) * plan.duration_days - Number(plan.price)) / Number(plan.price);
     const bestRate = best
       ? (Number(best.daily_return) * best.duration_days - Number(best.price)) / Number(best.price)
@@ -135,7 +131,7 @@ const Planos = () => {
                   {p.id === bestValuePlan?.id && (
                     <div className="mb-3 flex flex-wrap items-center gap-2">
                       <Badge className="bg-primary text-primary-foreground">Melhor custo-benefício</Badge>
-                      <span className="text-xs text-muted-foreground">Maior retorno percentual entre os 3 planos mais acessíveis</span>
+                      <span className="text-xs text-muted-foreground">Menor investimento e maior retorno percentual da coleção</span>
                     </div>
                   )}
                   <div className="flex items-center gap-2 mb-3">
