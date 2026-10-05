@@ -8,4 +8,4 @@
 - [x] Aplicar as seis fotos enviadas pelo usuário aos planos na ordem indicada e verificar que carregam
 - [ ] Criar a página Indicação integrada à navegação
 - [x] Ajustar retornos em progressão crescente conforme o valor investido
-- [x] Destacar de forma transparente o melhor retorno de curto prazo
+- [x] Destacar de forma transparente o melhor custo-benefício entre os planos mais acessíveis
