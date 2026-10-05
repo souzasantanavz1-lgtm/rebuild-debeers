@@ -87,9 +87,12 @@ const Planos = () => {
     });
   };
 
-  // Comparação proporcional: lucro total / valor investido, entre ciclos de até 7 dias.
-  const shortPlans = plans.filter((p) => p.duration_days <= 7 && Number(p.price) > 0);
-  const bestShortPlan = shortPlans.reduce<Plan | null>((best, plan) => {
+  // Melhor custo-benefício entre a metade mais acessível dos planos.
+  const affordablePlans = [...plans]
+    .filter((p) => Number(p.price) > 0)
+    .sort((a, b) => Number(a.price) - Number(b.price))
+    .slice(0, Math.ceil(plans.length / 2));
+  const bestValuePlan = affordablePlans.reduce<Plan | null>((best, plan) => {
     const rate = (Number(plan.daily_return) * plan.duration_days - Number(plan.price)) / Number(plan.price);
     const bestRate = best
       ? (Number(best.daily_return) * best.duration_days - Number(best.price)) / Number(best.price)
@@ -119,7 +122,7 @@ const Planos = () => {
             const profit = totalReturn - price;
             const profitPct = price > 0 ? (profit / price) * 100 : 0;
             return (
-              <Card key={p.id} className={`overflow-hidden ${p.id === bestShortPlan?.id ? "border-primary ring-1 ring-primary/30" : ""}`}>
+              <Card key={p.id} className={`overflow-hidden ${p.id === bestValuePlan?.id ? "border-primary ring-1 ring-primary/30" : ""}`}>
                 <img
                   src={IMG[p.slug] || planBruto.url}
                   alt={p.name}
@@ -129,10 +132,10 @@ const Planos = () => {
                   className="w-full h-44 object-cover"
                 />
                 <CardContent className="p-4">
-                  {p.id === bestShortPlan?.id && (
+                  {p.id === bestValuePlan?.id && (
                     <div className="mb-3 flex flex-wrap items-center gap-2">
-                      <Badge className="bg-primary text-primary-foreground">Melhor retorno percentual em até 7 dias</Badge>
-                      <span className="text-xs text-muted-foreground">Comparação entre os planos desta página</span>
+                      <Badge className="bg-primary text-primary-foreground">Melhor custo-benefício</Badge>
+                      <span className="text-xs text-muted-foreground">Maior retorno percentual entre os 3 planos mais acessíveis</span>
                     </div>
                   )}
                   <div className="flex items-center gap-2 mb-3">
