@@ -25,7 +25,7 @@ const PILARES = [
   {
     icon: Clock,
     title: "Prazos que respeitamos",
-    text: "Análise de depósito em até 24 horas úteis e pagamento de saque em até 24 horas úteis após a aprovação. Se algo atrasar, o atendimento informa o motivo.",
+    text: "Análise de depósito em até 3 dias úteis e pagamento de saque em até 3 dias úteis após a aprovação. Se algo atrasar, o atendimento informa o motivo.",
   },
 ];
 
@@ -114,7 +114,6 @@ const SobreNos = () => {
               <li>• Os percentuais e valores mostrados nos planos são projeções, não promessa de lucro.</li>
               <li>• Esta página não é recomendação de investimento. Invista apenas o que não comprometa seu orçamento.</li>
               <li>• É proibido usar a plataforma para lavagem de dinheiro ou qualquer atividade ilegal.</li>
-              <li>• Menores de 18 anos não podem manter conta na plataforma.</li>
             </ul>
             <p className="text-xs text-muted-foreground">
               Dúvidas sobre risco, prazo ou pagamento? Fale com o atendimento antes de investir.
