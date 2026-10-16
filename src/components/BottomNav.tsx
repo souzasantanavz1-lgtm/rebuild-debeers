@@ -2,8 +2,8 @@ import { Home, CreditCard, Banknote, LayoutGrid, User, Users } from "lucide-reac
 import { Link, useLocation } from "react-router-dom";
 
 const navItems = [
-  { icon: Home, label: "Home", path: "/dashboard" },
-  { icon: CreditCard, label: "Depositário", path: "/deposito" },
+  { icon: Home, label: "Início", path: "/dashboard" },
+  { icon: CreditCard, label: "Depósitos", path: "/deposito" },
   { icon: Banknote, label: "Sacar", path: "/saque" },
   { icon: LayoutGrid, label: "Planos", path: "/planos" },
   { icon: Users, label: "Indicação", path: "/indicacao" },
