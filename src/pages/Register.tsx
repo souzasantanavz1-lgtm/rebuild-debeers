@@ -122,8 +122,13 @@ const Register = () => {
 
             <div className="space-y-2">
               <Label htmlFor="phone" className="text-foreground font-medium">Telefone (Opcional)</Label>
-              <Input id="phone" type="tel" placeholder="(00) 00000-0000" {...registerField("phone")}
-                className="h-12 border-input" disabled={isLoading} />
+              <div className="flex h-12 rounded-md border border-input overflow-hidden focus-within:ring-2 focus-within:ring-ring">
+                <span className="flex items-center gap-2 px-3 border-r border-input bg-secondary/50 text-foreground font-medium select-none" aria-label="Brasil +55">
+                  <span aria-hidden="true">🇧🇷</span>+55
+                </span>
+                <Input id="phone" type="tel" inputMode="numeric" placeholder="(00) 00000-0000" {...registerField("phone")}
+                  className="h-full border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0" disabled={isLoading} />
+              </div>
             </div>
 
             <div className="space-y-2">
