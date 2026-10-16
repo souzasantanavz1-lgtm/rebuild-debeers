@@ -137,8 +137,8 @@ const Privacidade = () => {
         </Card>
 
         <p className="pb-2 text-center text-xs text-muted-foreground">
-          Aviso legal: todo investimento tem risco e nenhum retorno é garantido. Esta plataforma não é
-          recomendação de investimento. Texto atualizado em outubro de 2026.
+          Seus dados são tratados com responsabilidade e usados apenas para fazer a sua conta funcionar.
+          Texto atualizado em outubro de 2026.
         </p>
       </main>
 
