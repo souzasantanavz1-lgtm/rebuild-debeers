@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const navItems = [
   { icon: Home, label: "Início", path: "/dashboard" },
-  { icon: CreditCard, label: "Depósitos", path: "/deposito" },
+  { icon: CreditCard, label: "Depósito", path: "/deposito" },
   { icon: Banknote, label: "Sacar", path: "/saque" },
   { icon: LayoutGrid, label: "Planos", path: "/planos" },
   { icon: Users, label: "Indicação", path: "/indicacao" },
