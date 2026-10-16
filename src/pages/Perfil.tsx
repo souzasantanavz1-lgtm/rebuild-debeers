@@ -10,54 +10,46 @@ import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFinances } from "@/hooks/use-finances";
 
 interface Movement { id: string; kind: "Depósito" | "Saque"; amount: number; status: string; created_at: string; }
-interface Investment { amount: number; daily_return: number; status: string; started_at: string; }
 interface MenuItem { label: string; icon: LucideIcon; onClick: () => void; }
 
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-const STATUS: Record<string, string> = { pending: "Pendente", approved: "Aprovado", completed: "Concluído", rejected: "Recusado" };
+const STATUS: Record<string, string> = { pending: "Pendente", approved: "Aprovado", completed: "Concluído", rejected: "Recusado", paid: "Pago" };
 
 const Perfil = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [show, setShow] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [name, setName] = useState("");
-  const [balance, setBalance] = useState(0);
-  const [investments, setInvestments] = useState<Investment[]>([]);
+  const finances = useFinances();
+  const loading = finances.isPending;
+  const name = finances.data?.profile.name || finances.data?.profile.phone || user?.email?.split("@")[0] || "";
+  const balance = Number(finances.data?.profile.balance ?? 0);
+  const investments = finances.data?.investments;
   const [movements, setMovements] = useState<Movement[]>([]);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const [p, inv, dep, wd] = await Promise.all([
-        supabase.from("profiles").select("name,phone,balance").eq("user_id", user.id).maybeSingle(),
-        supabase.from("investments").select("amount,daily_return,status,started_at").eq("user_id", user.id),
+      const [dep, wd] = await Promise.all([
         supabase.from("deposits").select("id,amount,status,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
         supabase.from("withdrawals").select("id,amount,status,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
       ]);
-      setName(p.data?.name || p.data?.phone || user.email?.split("@")[0] || "");
-      setBalance(Number(p.data?.balance ?? 0));
-      setInvestments((inv.data ?? []).map((i) => ({ ...i, amount: Number(i.amount), daily_return: Number(i.daily_return) })));
       const all: Movement[] = [
         ...(dep.data ?? []).map((d) => ({ ...d, kind: "Depósito" as const, amount: Number(d.amount) })),
         ...(wd.data ?? []).map((w) => ({ ...w, kind: "Saque" as const, amount: Number(w.amount) })),
       ].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 5);
       setMovements(all);
-      setLoading(false);
     })();
   }, [user]);
 
   // Derived values (no effects)
   const summary = useMemo(() => {
-    const active = investments.filter((i) => i.status === "active");
+    const active = (investments ?? []).filter((i) => i.status === "active");
     const invested = active.reduce((s, i) => s + i.amount, 0);
     const daily = active.reduce((s, i) => s + i.daily_return, 0);
-    const produced = active.reduce((s, i) => {
-      const days = Math.max(0, Math.floor((Date.now() - new Date(i.started_at).getTime()) / 86_400_000));
-      return s + days * i.daily_return;
-    }, 0);
+    const produced = (investments ?? []).reduce((s, i) => s + i.credited_days * i.daily_return, 0);
     return { activeCount: active.length, invested, daily, produced };
   }, [investments]);
 
@@ -89,6 +81,7 @@ const Perfil = () => {
       </header>
 
       <main className="px-4 -mt-10 space-y-5">
+        {finances.isError && <p role="alert" className="text-sm text-destructive">Não foi possível carregar suas carteiras. Reabra a página para tentar novamente.</p>}
         <Card className="shadow-lg">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center"><User className="h-6 w-6 text-primary" /></div>

@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { depositAmountSchema } from "@/lib/finance";
 
 type Deposit = {
   id: string;
@@ -46,6 +47,7 @@ const Deposito = () => {
   }, [user]);
 
   const handleDeposit = async () => {
+    if (loading) return;
     const value = Number(amount);
     if (!Number.isFinite(value) || value < MINIMUM_DEPOSIT) {
       toast({ title: "Valor inválido", description: "Mínimo de R$ 20,00", variant: "destructive" });
@@ -56,20 +58,8 @@ const Deposito = () => {
       return;
     }
     if (!user) return;
-    setLoading(true);
-    const { error } = await supabase
-      .from("deposits")
-      .insert({ user_id: user.id, amount: value, status: "pending", method: "pix" });
-    setLoading(false);
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
-      return;
-    }
-    const fakePix = `00020126360014BR.GOV.BCB.PIX0114debeers${Date.now()}5204000053039865802BR5910DE BEERS6009SAO PAULO62070503***6304`;
-    setPixKey(fakePix);
-    toast({ title: "Depósito criado ✅", description: "Aguardando confirmação do PIX." });
-    setAmount("");
-    loadDeposits();
+    if (!depositAmountSchema.safeParse(value).success) return toast({ title: "Valor inválido", description: "Use até duas casas decimais.", variant: "destructive" });
+    toast({ title: "PIX indisponível", description: "O recebimento por PIX ainda não está configurado. Fale com o atendimento.", variant: "destructive" });
   };
 
   const copyPix = () => {
@@ -135,7 +125,7 @@ const Deposito = () => {
                   </Button>
                 </div>
                 <p className="text-[10px] text-muted-foreground mt-2">
-                  Após o pagamento, o saldo será creditado em até alguns minutos.
+                  Após a confirmação do pagamento, a análise ocorre em até 3 dias úteis.
                 </p>
               </div>
             )}

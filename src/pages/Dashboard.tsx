@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import heroDiamonds from "@/assets/hero-diamonds.jpg";
 import heroMiner from "@/assets/hero-miner.jpg";
+import { useFinances } from "@/hooks/use-finances";
 
 const actions = [
   { icon: CalendarCheck, label: "Check-in", path: "/checkin" },
@@ -20,19 +21,18 @@ const actions = [
 
 const heroImages = [heroMiner, heroDiamonds];
 
-const recentEarnings = [
-  { name: "João S.****", plan: "Cofre de Diamantes", amount: "+R$ 88,00", time: "10 minutos atrás" },
-  { name: "Diego F.*******", plan: "Diamante Lapidado", amount: "+R$ 20,00", time: "15 minutos atrás" },
-  { name: "Mariana D.***", plan: "Coleção de Cervejas", amount: "+R$ 180,00", time: "1 min atrás" },
-  { name: "Vinícius B.*****", plan: "Tesouro de Cervejas", amount: "+R$ 220,00", time: "7 min atrás" },
-  { name: "Isabela A.*****", plan: "Diamante Bruto", amount: "+R$ 10,00", time: "10 minutos atrás" },
-  { name: "Carlos M.***", plan: "Mina de Diamantes", amount: "+R$ 275,00", time: "3 min atrás" },
-  { name: "Ana P.****", plan: "Lapidação Premium", amount: "+R$ 400,00", time: "5 minutos atrás" },
-];
 
 const Dashboard = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [profile, setProfile] = useState<{ name: string; balance: number; referral_code: string | null } | null>(null);
+  const finances = useFinances();
+  const profile = finances.data?.profile;
+  const recentEarnings = (finances.data?.earnings ?? []).map((earning) => ({
+    id: earning.id,
+    name: profile?.name || "Sua conta",
+    plan: finances.data?.investments.find((investment) => investment.id === earning.investment_id)?.plan_name || "Rendimento",
+    amount: `+${Number(earning.amount).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`,
+    time: new Date(earning.created_at).toLocaleString("pt-BR"),
+  }));
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -44,18 +44,6 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      supabase
-        .from("profiles")
-        .select("name, balance, referral_code")
-        .eq("user_id", user.id)
-        .single()
-        .then(({ data }) => {
-          if (data) setProfile(data);
-        });
-    }
-  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -148,8 +136,10 @@ const Dashboard = () => {
               Ganhos Recentes
             </h3>
             <div className="space-y-3">
-              {recentEarnings.map((earning, index) => (
-                <div key={index} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+              {finances.isError && <p role="alert" className="text-sm text-destructive">Não foi possível consultar seus rendimentos.</p>}
+              {!finances.isError && recentEarnings.length === 0 && <p className="text-sm text-muted-foreground">{finances.isPending ? "Carregando..." : "Nenhum rendimento creditado ainda."}</p>}
+              {recentEarnings.map((earning) => (
+                <div key={earning.id} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
                   <div className="bg-secondary rounded-full p-2">
                     <User className="h-4 w-4 text-primary" />
                   </div>
