@@ -28,22 +28,26 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
-            <Route path="/deposito" element={<ProtectedRoute><Deposito /></ProtectedRoute>} />
-            <Route path="/saque" element={<ProtectedRoute><Saque /></ProtectedRoute>} />
-            <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
-            <Route path="/indicacao" element={<ProtectedRoute><Indicacao /></ProtectedRoute>} />
-            <Route path="/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
-            <Route path="/checkin" element={<ProtectedRoute><CheckIn /></ProtectedRoute>} />
-            <Route path="/sobre-nos" element={<ProtectedRoute><SobreNos /></ProtectedRoute>} />
-            <Route path="/privacidade" element={<ProtectedRoute><Privacidade /></ProtectedRoute>} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <div className="min-h-screen w-full bg-background flex justify-center">
+            <div className="relative w-full max-w-[480px] bg-background md:border-x md:border-border md:shadow-sm">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
+                <Route path="/deposito" element={<ProtectedRoute><Deposito /></ProtectedRoute>} />
+                <Route path="/saque" element={<ProtectedRoute><Saque /></ProtectedRoute>} />
+                <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
+                <Route path="/indicacao" element={<ProtectedRoute><Indicacao /></ProtectedRoute>} />
+                <Route path="/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
+                <Route path="/checkin" element={<ProtectedRoute><CheckIn /></ProtectedRoute>} />
+                <Route path="/sobre-nos" element={<ProtectedRoute><SobreNos /></ProtectedRoute>} />
+                <Route path="/privacidade" element={<ProtectedRoute><Privacidade /></ProtectedRoute>} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+          </div>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
