@@ -10,3 +10,7 @@
 - [x] Ajustar retornos em progressão crescente conforme o valor investido
 - [x] Destacar o Pacote de Diamantes como menor investimento e maior retorno percentual da coleção
 - [x] Criar as páginas Sobre nós e Privacidade acessíveis pelo Menu do Perfil
+- [ ] Corrigir compra de planos, crédito real com teto de prazo e histórico financeiro idempotente
+- [ ] Corrigir arredondamento, saldo disponível e devolução de saques recusados
+- [ ] Remover PIX fictício e reforçar validações e autenticação sem mudar o layout
+- [ ] Verificar regras financeiras e isolamento com testes e fluxo autenticado
