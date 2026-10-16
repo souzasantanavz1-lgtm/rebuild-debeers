@@ -9,3 +9,4 @@
 - [ ] Criar a página Indicação integrada à navegação
 - [x] Ajustar retornos em progressão crescente conforme o valor investido
 - [x] Destacar o Pacote de Diamantes como menor investimento e maior retorno percentual da coleção
+- [x] Criar as páginas Sobre nós e Privacidade acessíveis pelo Menu do Perfil

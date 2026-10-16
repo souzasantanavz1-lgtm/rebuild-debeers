@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
 
 interface Movement { id: string; kind: "Depósito" | "Saque"; amount: number; status: string; created_at: string; }
 interface Investment { amount: number; daily_return: number; status: string; started_at: string; }
@@ -22,7 +21,6 @@ const STATUS: Record<string, string> = { pending: "Pendente", approved: "Aprovad
 const Perfil = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { toast } = useToast();
   const [show, setShow] = useState(true);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
