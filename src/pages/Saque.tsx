@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useFinances } from "@/hooks/use-finances";
+import { moneySchema, validCpf, withdrawalAmounts } from "@/lib/finance";
 
 type Withdrawal = {
   id: string;
@@ -22,7 +24,8 @@ type Withdrawal = {
 const Saque = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [balance, setBalance] = useState(0);
+  const finances = useFinances();
+  const balance = Number(finances.data?.profile.balance ?? 0);
   const [amount, setAmount] = useState<string>("");
   const [cpf, setCpf] = useState("");
   const [pixKey, setPixKey] = useState("");
@@ -31,26 +34,22 @@ const Saque = () => {
 
   const load = async () => {
     if (!user) return;
-    const [{ data: profile }, { data: ws }] = await Promise.all([
-      supabase.from("profiles").select("balance").eq("user_id", user.id).single(),
-      supabase.from("withdrawals").select("id, amount, fee, net_amount, status, created_at")
-        .eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
-    ]);
-    if (profile) setBalance(Number(profile.balance));
+    const { data: ws } = await supabase.from("withdrawals").select("id, amount, fee, net_amount, status, created_at")
+      .eq("user_id", user.id).order("created_at", { ascending: false }).limit(10);
     if (ws) setList(ws);
   };
 
   useEffect(() => { load(); }, [user]);
 
   const value = Number(amount) || 0;
-  const fee = +(value * 0.12).toFixed(2);
-  const net = +(value * 0.88).toFixed(2);
+  const validAmount = moneySchema.safeParse(value).success;
+  const { fee, net } = validAmount ? withdrawalAmounts(value) : { fee: 0, net: 0 };
 
   const handleSubmit = async () => {
-    if (!user) return;
-    if (!value || value <= 0) return toast({ title: "Valor inválido", variant: "destructive" });
+    if (!user || loading) return;
+    if (!validAmount) return toast({ title: "Valor inválido", description: "Use um valor positivo com até duas casas decimais.", variant: "destructive" });
     if (value > balance) return toast({ title: "Saldo insuficiente", variant: "destructive" });
-    if (cpf.replace(/\D/g, "").length !== 11) return toast({ title: "CPF inválido", variant: "destructive" });
+    if (!validCpf(cpf)) return toast({ title: "CPF inválido", variant: "destructive" });
     const pix = pixKey.trim();
     if (pix.length < 4 || pix.length > 140) return toast({ title: "Chave PIX inválida", description: "Use de 4 a 140 caracteres.", variant: "destructive" });
 
@@ -61,9 +60,10 @@ const Saque = () => {
     });
     setLoading(false);
     if (error) return toast({ title: "Erro", description: error.message, variant: "destructive" });
-    toast({ title: "Saque solicitado ✅", description: `Você receberá R$ ${net.toFixed(2).replace(".", ",")} em até 24h.` });
+    toast({ title: "Saque solicitado ✅", description: `Você receberá R$ ${net.toFixed(2).replace(".", ",")} em até 3 dias úteis.` });
     setAmount(""); setCpf(""); setPixKey("");
     load();
+    void finances.refetch();
   };
 
   return (
@@ -119,7 +119,8 @@ const Saque = () => {
                 </div>
               )}
 
-              <Button onClick={handleSubmit} disabled={loading} className="w-full">
+              {finances.isError && <p role="alert" className="text-sm text-destructive">Não foi possível consultar seu saldo.</p>}
+              <Button onClick={handleSubmit} disabled={loading || finances.isPending || finances.isError} className="w-full">
                 {loading ? "Processando..." : "Solicitar Saque"}
               </Button>
             </div>

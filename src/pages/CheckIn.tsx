@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { businessDate } from "@/lib/finance";
 
 const WEEK_LABELS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 const BONUS = 0.5;
@@ -15,7 +16,7 @@ const toIso = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 function buildWeek(): { iso: string; dayNum: number; label: string }[] {
-  const today = new Date();
+  const today = new Date(`${businessDate()}T12:00:00`);
   const dow = today.getDay(); // 0=Sun..6=Sat
   const diffToMon = dow === 0 ? -6 : 1 - dow;
   const monday = new Date(today);
@@ -34,7 +35,7 @@ const CheckIn = () => {
   const { toast } = useToast();
 
   const week = useMemo(buildWeek, []);
-  const today = toIso(new Date());
+  const today = businessDate();
 
   const [balance, setBalance] = useState<number>(0);
   const [checked, setChecked] = useState<Set<string>>(new Set());
@@ -66,7 +67,7 @@ const CheckIn = () => {
     if (allIns) {
       const dates = new Set(allIns.map((r: { check_in_date: string }) => r.check_in_date));
       let s = 0;
-      const cursor = new Date();
+      const cursor = new Date(`${today}T12:00:00`);
       // start from today; if not present, start from yesterday
       if (!dates.has(toIso(cursor))) cursor.setDate(cursor.getDate() - 1);
       while (dates.has(toIso(cursor))) {

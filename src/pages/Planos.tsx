@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useFinances } from "@/hooks/use-finances";
 import planBruto from "@/assets/plano-pacote-diamantes.png.asset.json";
 import planLapidado from "@/assets/plano-bau-diamantes.webp.asset.json";
 import planCaminhao from "@/assets/plano-carreta-diamantes.webp.asset.json";
@@ -47,7 +48,9 @@ const Planos = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [plans, setPlans] = useState<Plan[]>([]);
-  const [balance, setBalance] = useState(0);
+  const finances = useFinances();
+  const balance = Number(finances.data?.profile.balance ?? 0);
+  const [investing, setInvesting] = useState(false);
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
@@ -60,19 +63,10 @@ const Planos = () => {
         if (error) setLoadError(true);
         else if (data) setPlans(data as Plan[]);
       });
-    if (user) {
-      supabase
-        .from("profiles")
-        .select("balance")
-        .eq("user_id", user.id)
-        .single()
-        .then(({ data }) => {
-          if (data) setBalance(Number(data.balance));
-        });
-    }
   }, [user]);
 
-  const invest = (p: Plan) => {
+  const invest = async (p: Plan) => {
+    if (!user || investing) return;
     if (balance < p.price) {
       toast({
         title: "Saldo insuficiente",
@@ -81,10 +75,15 @@ const Planos = () => {
       });
       return;
     }
-    toast({
-      title: "Em análise 💎",
-      description: "Sua solicitação de investimento foi enviada e será ativada após confirmação.",
-    });
+    setInvesting(true);
+    try {
+      const { error } = await supabase.rpc("buy_investment_plan", { _plan_id: p.id });
+      if (error) throw error;
+      await finances.refetch();
+      toast({ title: "Em análise 💎", description: "Sua solicitação foi registrada e será ativada após confirmação." });
+    } catch (error) {
+      toast({ title: "Não foi possível investir", description: error instanceof Error ? error.message : "Confira seu saldo e o limite de compras.", variant: "destructive" });
+    } finally { setInvesting(false); }
   };
 
   // Melhor custo-benefício: maior retorno percentual entre todos os planos.
@@ -187,7 +186,7 @@ const Planos = () => {
                     </div>
                   </div>
 
-                  <Button onClick={() => invest(p)} className="w-full h-11 text-base font-semibold">
+                  <Button disabled={investing || finances.isPending || finances.isError} onClick={() => invest(p)} className="w-full h-11 text-base font-semibold">
                     <ShoppingBag className="mr-2 h-4 w-4" /> Investir Agora
                   </Button>
                 </CardContent>
@@ -195,6 +194,7 @@ const Planos = () => {
             );
           })}
           {loadError && <p className="text-sm text-destructive text-center py-8">Não foi possível carregar os planos. Tente novamente.</p>}
+          {finances.isError && <p role="alert" className="text-sm text-destructive">Não foi possível consultar seu saldo. Tente novamente.</p>}
           {!loadError && plans.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-8">Carregando planos...</p>
           )}
