@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import {
-  ArrowLeft, ShieldCheck, Scale, Lock, Clock, BadgeCheck, AlertTriangle, Gem,
+  ArrowLeft, ShieldCheck, Scale, Lock, Clock, BadgeCheck, Handshake, Gem,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -103,20 +103,20 @@ const SobreNos = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-destructive/40">
+        <Card className="border-primary/30">
           <CardContent className="p-5 space-y-3">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              <h2 className="text-lg font-semibold text-foreground">Leia com atenção</h2>
+              <Handshake className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-primary">Compromisso com quem investe</h2>
             </div>
             <ul className="space-y-2 text-sm leading-relaxed text-muted-foreground">
-              <li>• Todo investimento tem risco. Nenhum retorno é garantido, mesmo que o plano tenha prazo anunciado.</li>
-              <li>• Os percentuais e valores mostrados nos planos são projeções, não promessa de lucro.</li>
-              <li>• Esta página não é recomendação de investimento. Invista apenas o que não comprometa seu orçamento.</li>
-              <li>• É proibido usar a plataforma para lavagem de dinheiro ou qualquer atividade ilegal.</li>
+              <li>• Depósitos e saques passam por conferência antes de serem liberados. Isso protege você e protege a operação.</li>
+              <li>• Cada conta é individual: o saldo, os planos e os rendimentos que aparecem na sua tela são os registros feitos no seu nome.</li>
+              <li>• Trabalhamos com prazos definidos: análise de depósito e pagamento de saque em até 3 dias úteis.</li>
+              <li>• É proibido usar a plataforma para lavagem de dinheiro ou qualquer atividade ilegal. Contas nessa situação são bloqueadas.</li>
             </ul>
             <p className="text-xs text-muted-foreground">
-              Dúvidas sobre risco, prazo ou pagamento? Fale com o atendimento antes de investir.
+              Ficou com dúvida sobre plano, prazo ou pagamento? Fale com o atendimento antes de investir.
             </p>
             <Button variant="outline" className="w-full" onClick={() => navigate("/suporte")}>
               Falar com o atendimento
