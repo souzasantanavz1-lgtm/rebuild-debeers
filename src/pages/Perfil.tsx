@@ -1,115 +1,182 @@
-import { Zap, Banknote, Star, AlertTriangle, MessageCircle } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  User, Eye, EyeOff, Wallet, TrendingUp, Plus, ArrowDownToLine, FileText, UserPlus,
+  ChevronRight, Gem, CalendarCheck, CreditCard, ShieldCheck, Building2, Headphones, LogOut, Loader2,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/BottomNav";
-import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+
+interface Movement { id: string; kind: "Depósito" | "Saque"; amount: number; status: string; created_at: string; }
+interface Investment { amount: number; daily_return: number; status: string; started_at: string; }
+interface MenuItem { label: string; icon: LucideIcon; onClick: () => void; }
+
+const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const STATUS: Record<string, string> = { pending: "Pendente", approved: "Aprovado", completed: "Concluído", rejected: "Recusado" };
 
 const Perfil = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const [show, setShow] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [name, setName] = useState("");
+  const [balance, setBalance] = useState(0);
+  const [investments, setInvestments] = useState<Investment[]>([]);
+  const [movements, setMovements] = useState<Movement[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const [p, inv, dep, wd] = await Promise.all([
+        supabase.from("profiles").select("name,phone,balance").eq("user_id", user.id).maybeSingle(),
+        supabase.from("investments").select("amount,daily_return,status,started_at").eq("user_id", user.id),
+        supabase.from("deposits").select("id,amount,status,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
+        supabase.from("withdrawals").select("id,amount,status,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
+      ]);
+      setName(p.data?.name || p.data?.phone || user.email?.split("@")[0] || "");
+      setBalance(Number(p.data?.balance ?? 0));
+      setInvestments((inv.data ?? []).map((i) => ({ ...i, amount: Number(i.amount), daily_return: Number(i.daily_return) })));
+      const all: Movement[] = [
+        ...(dep.data ?? []).map((d) => ({ ...d, kind: "Depósito" as const, amount: Number(d.amount) })),
+        ...(wd.data ?? []).map((w) => ({ ...w, kind: "Saque" as const, amount: Number(w.amount) })),
+      ].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 5);
+      setMovements(all);
+      setLoading(false);
+    })();
+  }, [user]);
+
+  // Derived values (no effects)
+  const summary = useMemo(() => {
+    const active = investments.filter((i) => i.status === "active");
+    const invested = active.reduce((s, i) => s + i.amount, 0);
+    const daily = active.reduce((s, i) => s + i.daily_return, 0);
+    const produced = active.reduce((s, i) => {
+      const days = Math.max(0, Math.floor((Date.now() - new Date(i.started_at).getTime()) / 86_400_000));
+      return s + days * i.daily_return;
+    }, 0);
+    return { activeCount: active.length, invested, daily, produced };
+  }, [investments]);
+
+  const money = (v: number) => (show ? brl(v) : "R$ ••••");
+
+  const actions: MenuItem[] = [
+    { label: "Depositar", icon: Plus, onClick: () => navigate("/deposito") },
+    { label: "Sacar", icon: ArrowDownToLine, onClick: () => navigate("/saque") },
+    { label: "Histórico", icon: FileText, onClick: () => document.getElementById("movimentacoes")?.scrollIntoView({ behavior: "smooth" }) },
+    { label: "Indicar", icon: UserPlus, onClick: () => navigate("/indicacao") },
+  ];
+
+  const menu: MenuItem[] = [
+    { label: "Planos", icon: Gem, onClick: () => navigate("/planos") },
+    { label: "Check-in", icon: CalendarCheck, onClick: () => navigate("/checkin") },
+    { label: "PIX", icon: CreditCard, onClick: () => navigate("/deposito") },
+    { label: "Privacidade", icon: ShieldCheck, onClick: () => toast({ title: "Privacidade", description: "Seus dados são protegidos e nunca compartilhados." }) },
+    { label: "Sobre nós", icon: Building2, onClick: () => toast({ title: "De Beers", description: "A DIAMOND IS FOREVER" }) },
+    { label: "Atendimento", icon: Headphones, onClick: () => navigate("/suporte") },
+  ];
+
+  const handleLogout = async () => { await signOut(); navigate("/"); };
 
   return (
-    <div className="min-h-screen bg-muted pb-20">
-      {/* Header */}
+    <div className="min-h-screen bg-muted pb-24">
       <header className="bg-primary text-primary-foreground px-4 pt-6 pb-16">
         <h1 className="text-xl font-serif tracking-wider">DE BEERS</h1>
         <p className="text-[10px] tracking-[0.3em] opacity-80">A DIAMOND IS FOREVER</p>
       </header>
 
-      {/* Lucro Diário Automático Card */}
-      <div className="px-4 -mt-10">
+      <main className="px-4 -mt-10 space-y-5">
         <Card className="shadow-lg">
-          <CardContent className="p-5">
-            <h3 className="text-lg font-bold text-primary flex items-center gap-2">
-              Lucro Diário Automático
-              <span className="text-blue-500">💎</span>
-            </h3>
-
-            <div className="flex gap-3 mt-4">
-              <div className="flex-1 bg-muted rounded-xl p-4 text-center">
-                <div className="flex items-center justify-center gap-1 text-muted-foreground text-sm mb-1">
-                  <Zap className="h-4 w-4" />
-                  Depósito
-                </div>
-                <p className="text-xl font-bold text-foreground">R$ 20,00</p>
-              </div>
-              <div className="flex-1 bg-muted rounded-xl p-4 text-center">
-                <div className="flex items-center justify-center gap-1 text-muted-foreground text-sm mb-1">
-                  <Banknote className="h-4 w-4" />
-                  Saque
-                </div>
-                <p className="text-xl font-bold text-foreground">R$ 20 (12%)</p>
-              </div>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center"><User className="h-6 w-6 text-primary" /></div>
+            <div className="min-w-0">
+              <p className="font-bold text-foreground truncate">Olá, {name} 👋</p>
+              <p className="text-sm text-muted-foreground">Bem-vindo(a)!</p>
             </div>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Programa de Indicação */}
-      <div className="px-4 mt-4">
-        <Card className="shadow-sm">
-          <CardContent className="p-5">
-            <h3 className="text-base font-bold text-foreground flex items-center gap-2 mb-4">
-              <Star className="h-5 w-5 text-amber-500" />
-              Programa de Indicação
-            </h3>
+        <section aria-labelledby="carteiras" className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 id="carteiras" className="font-bold text-foreground">Minhas carteiras</h2>
+            <button onClick={() => setShow((s) => !s)} aria-label={show ? "Ocultar valores" : "Mostrar valores"} className="text-muted-foreground">
+              {show ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+            </button>
+          </div>
+          <Card><CardContent className="p-4 flex items-center gap-3">
+            <div className="h-11 w-11 rounded-full bg-primary/10 flex items-center justify-center"><Wallet className="h-5 w-5 text-primary" /></div>
+            <div className="flex-1"><p className="text-xs text-muted-foreground">Carteira de investimento</p><p className="text-lg font-bold text-foreground">{loading ? "…" : money(summary.invested)}</p></div>
+            <Button size="sm" onClick={() => navigate("/deposito")}><Plus className="h-4 w-4 mr-1" />Depositar</Button>
+          </CardContent></Card>
+          <Card><CardContent className="p-4 flex items-center gap-3">
+            <div className="h-11 w-11 rounded-full bg-primary/10 flex items-center justify-center"><TrendingUp className="h-5 w-5 text-primary" /></div>
+            <div className="flex-1"><p className="text-xs text-muted-foreground">Carteira de retorno</p><p className="text-lg font-bold text-foreground">{loading ? "…" : money(balance)}</p></div>
+            <Button size="sm" variant="outline" onClick={() => navigate("/saque")}><ArrowDownToLine className="h-4 w-4 mr-1" />Sacar</Button>
+          </CardContent></Card>
+        </section>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-semibold text-foreground mb-2">1ª Compra</p>
-                <div className="space-y-1">
-                  <p className="text-sm"><span className="text-amber-500 font-bold">N1</span> 🌟🌟 <span className="font-semibold">15%</span></p>
-                  <p className="text-sm"><span className="text-blue-500 font-bold">N2</span> 🔷🔷 <span className="font-semibold">2%</span></p>
-                  <p className="text-sm"><span className="text-red-500 font-bold">N3</span> 🔴🔴 <span className="font-semibold">1%</span></p>
-                </div>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground mb-2">Demais</p>
-                <div className="space-y-1">
-                  <p className="text-sm"><span className="text-amber-500 font-bold">N1</span> 🌟🌟 <span className="font-semibold">8%</span></p>
-                  <p className="text-sm"><span className="text-blue-500 font-bold">N2</span> 🔷🔷 <span className="font-semibold">1%</span></p>
-                  <p className="text-sm"><span className="text-red-500 font-bold">N3</span> 🔴🔴 <span className="font-semibold">1%</span></p>
-                </div>
-              </div>
+        <nav aria-label="Ações rápidas" className="grid grid-cols-4 gap-2">
+          {actions.map((a) => (
+            <button key={a.label} onClick={a.onClick} className="flex flex-col items-center gap-1 py-2 text-foreground">
+              <a.icon className="h-6 w-6 text-primary" /><span className="text-xs">{a.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <section aria-labelledby="resumo" className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 id="resumo" className="font-bold text-foreground">Resumo dos rendimentos</h2>
+            <button onClick={() => navigate("/planos")} className="text-sm text-muted-foreground flex items-center">Ver detalhes<ChevronRight className="h-4 w-4" /></button>
+          </div>
+          <Card><CardContent className="p-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center"><TrendingUp className="h-6 w-6 text-primary-foreground" /></div>
+              <div><p className="text-sm text-muted-foreground">Rendendo agora (por dia)</p><p className="text-xl font-bold text-foreground">{money(summary.daily)}</p></div>
             </div>
-
-            <div className="mt-4 flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-3">
-              <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-              <p className="text-xs">Só saça com plano ativo</p>
+            <div className="grid grid-cols-3 gap-2 border-t border-border pt-3 text-sm">
+              <div><p className="text-muted-foreground">Planos ativos</p><p className="font-bold text-foreground">{summary.activeCount}</p></div>
+              <div><p className="text-muted-foreground">Saldo renda</p><p className="font-bold text-foreground">{money(balance)}</p></div>
+              <div><p className="text-muted-foreground">Produção acumulada</p><p className="font-bold text-foreground">{money(summary.produced)}</p></div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </CardContent></Card>
+        </section>
 
-      {/* WhatsApp Groups */}
-      <div className="px-4 mt-4 space-y-3">
-        <Button
-          className="w-full h-14 text-base font-semibold rounded-xl flex items-center justify-center gap-2"
-          style={{ backgroundColor: "hsl(220, 80%, 50%)" }}
-          onClick={() => toast({ title: "Grupo WhatsApp #2", description: "Link em breve." })}
-        >
-          <MessageCircle className="h-5 w-5" />
-          Grupo WhatsApp #2
-        </Button>
-        <Button
-          className="w-full h-14 text-base font-semibold rounded-xl flex items-center justify-center gap-2"
-          style={{ backgroundColor: "hsl(220, 80%, 40%)" }}
-          onClick={() => toast({ title: "Grupo WhatsApp #1", description: "Link em breve." })}
-        >
-          <MessageCircle className="h-5 w-5" />
-          Grupo WhatsApp #1
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full h-12 text-base font-semibold rounded-xl"
-          onClick={() => toast({ title: "Comece agora", description: "Em desenvolvimento." })}
-        >
-          Comece agora
-        </Button>
-      </div>
+        <section id="movimentacoes" aria-labelledby="mov" className="space-y-3">
+          <h2 id="mov" className="font-bold text-foreground">Últimas movimentações</h2>
+          <Card><CardContent className="p-4">
+            {loading ? <Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
+              : movements.length === 0 ? <p className="text-center text-muted-foreground">Nenhuma movimentação ainda</p>
+              : <ul className="divide-y divide-border">
+                  {movements.map((m) => (
+                    <li key={m.id} className="py-2 flex justify-between text-sm">
+                      <div><p className="font-medium text-foreground">{m.kind}</p><p className="text-xs text-muted-foreground">{new Date(m.created_at).toLocaleDateString("pt-BR")} · {STATUS[m.status] ?? m.status}</p></div>
+                      <p className="font-bold text-foreground">{m.kind === "Saque" ? "-" : "+"}{money(m.amount)}</p>
+                    </li>
+                  ))}
+                </ul>}
+          </CardContent></Card>
+        </section>
 
-      <div className="h-6" />
+        <section aria-labelledby="menu" className="space-y-3">
+          <h2 id="menu" className="font-bold text-foreground">Menu</h2>
+          <Card><CardContent className="p-4 space-y-4">
+            <div className="grid grid-cols-4 gap-y-4">
+              {menu.map((m) => (
+                <button key={m.label} onClick={m.onClick} className="flex flex-col items-center gap-1 text-center">
+                  <span className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center"><m.icon className="h-5 w-5 text-primary" /></span>
+                  <span className="text-xs text-muted-foreground">{m.label}</span>
+                </button>
+              ))}
+            </div>
+            <Button variant="outline" className="w-full" onClick={handleLogout}><LogOut className="h-4 w-4 mr-2" />Sair da conta</Button>
+          </CardContent></Card>
+        </section>
+      </main>
       <BottomNav />
     </div>
   );
