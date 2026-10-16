@@ -44,6 +44,7 @@ export type Database = {
           created_at: string
           id: string
           method: string | null
+          payment_reference: string | null
           status: string
           updated_at: string
           user_id: string
@@ -53,6 +54,7 @@ export type Database = {
           created_at?: string
           id?: string
           method?: string | null
+          payment_reference?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -62,11 +64,53 @@ export type Database = {
           created_at?: string
           id?: string
           method?: string | null
+          payment_reference?: string | null
           status?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      investment_earnings: {
+        Row: {
+          amount: number
+          created_at: string
+          cycle_day: number
+          deleted_at: string | null
+          id: string
+          investment_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          cycle_day: number
+          deleted_at?: string | null
+          id?: string
+          investment_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          cycle_day?: number
+          deleted_at?: string | null
+          id?: string
+          investment_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investment_earnings_investment_id_fkey"
+            columns: ["investment_id"]
+            isOneToOne: false
+            referencedRelation: "investments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       investment_plans: {
         Row: {
@@ -117,9 +161,12 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          credited_days: number
           daily_return: number
+          duration_days: number
           expires_at: string | null
           id: string
+          plan_id: string | null
           plan_name: string
           started_at: string
           status: string
@@ -128,9 +175,12 @@ export type Database = {
         Insert: {
           amount?: number
           created_at?: string
+          credited_days?: number
           daily_return?: number
+          duration_days?: number
           expires_at?: string | null
           id?: string
+          plan_id?: string | null
           plan_name: string
           started_at?: string
           status?: string
@@ -139,15 +189,26 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          credited_days?: number
           daily_return?: number
+          duration_days?: number
           expires_at?: string | null
           id?: string
+          plan_id?: string | null
           plan_name?: string
           started_at?: string
           status?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "investments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "investment_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -286,7 +347,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      buy_investment_plan: { Args: { _plan_id: string }; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
+      get_business_date: { Args: never; Returns: string }
       get_my_referral_summary: {
         Args: never
         Returns: {
@@ -297,6 +360,7 @@ export type Database = {
       get_profile_referral_code: { Args: { _user_id: string }; Returns: string }
       get_profile_referred_by: { Args: { _user_id: string }; Returns: string }
       get_user_balance: { Args: { _user_id: string }; Returns: number }
+      sync_my_finances: { Args: never; Returns: number }
     }
     Enums: {
       [_ in never]: never
