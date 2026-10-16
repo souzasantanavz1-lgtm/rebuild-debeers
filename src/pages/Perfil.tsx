@@ -76,8 +76,8 @@ const Perfil = () => {
     { label: "Planos", icon: Gem, onClick: () => navigate("/planos") },
     { label: "Check-in", icon: CalendarCheck, onClick: () => navigate("/checkin") },
     { label: "PIX", icon: CreditCard, onClick: () => navigate("/deposito") },
-    { label: "Privacidade", icon: ShieldCheck, onClick: () => toast({ title: "Privacidade", description: "Seus dados são protegidos e nunca compartilhados." }) },
-    { label: "Sobre nós", icon: Building2, onClick: () => toast({ title: "De Beers", description: "A DIAMOND IS FOREVER" }) },
+    { label: "Privacidade", icon: ShieldCheck, onClick: () => navigate("/privacidade") },
+    { label: "Sobre nós", icon: Building2, onClick: () => navigate("/sobre-nos") },
     { label: "Atendimento", icon: Headphones, onClick: () => navigate("/suporte") },
   ];
 
