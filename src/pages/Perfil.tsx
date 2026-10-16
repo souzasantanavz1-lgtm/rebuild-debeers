@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
 
 interface Movement { id: string; kind: "Depósito" | "Saque"; amount: number; status: string; created_at: string; }
 interface Investment { amount: number; daily_return: number; status: string; started_at: string; }
@@ -22,7 +21,6 @@ const STATUS: Record<string, string> = { pending: "Pendente", approved: "Aprovad
 const Perfil = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { toast } = useToast();
   const [show, setShow] = useState(true);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
@@ -76,8 +74,8 @@ const Perfil = () => {
     { label: "Planos", icon: Gem, onClick: () => navigate("/planos") },
     { label: "Check-in", icon: CalendarCheck, onClick: () => navigate("/checkin") },
     { label: "PIX", icon: CreditCard, onClick: () => navigate("/deposito") },
-    { label: "Privacidade", icon: ShieldCheck, onClick: () => toast({ title: "Privacidade", description: "Seus dados são protegidos e nunca compartilhados." }) },
-    { label: "Sobre nós", icon: Building2, onClick: () => toast({ title: "De Beers", description: "A DIAMOND IS FOREVER" }) },
+    { label: "Privacidade", icon: ShieldCheck, onClick: () => navigate("/privacidade") },
+    { label: "Sobre nós", icon: Building2, onClick: () => navigate("/sobre-nos") },
     { label: "Atendimento", icon: Headphones, onClick: () => navigate("/suporte") },
   ];
 
