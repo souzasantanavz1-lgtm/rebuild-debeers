@@ -1,0 +1,58 @@
+CREATE OR REPLACE FUNCTION private.verify_financial_rules(_user_id uuid) RETURNS text LANGUAGE plpgsql SECURITY DEFINER SET search_path=public,private,pg_temp AS $$
+DECLARE initial_balance numeric; deposit_id uuid; w1 uuid; w2 uuid; investment_id uuid; plan uuid; rejected boolean; after_refund numeric;
+BEGIN
+ BEGIN
+  SELECT balance INTO initial_balance FROM public.profiles WHERE user_id=_user_id FOR UPDATE;
+  IF initial_balance IS NULL THEN RAISE EXCEPTION 'Test profile missing'; END IF;
+  INSERT INTO public.deposits(user_id,amount) VALUES(_user_id,10000) RETURNING id INTO deposit_id;
+  UPDATE public.deposits SET status='approved',payment_reference='ROLLBACK-VERIFY-'||deposit_id WHERE id=deposit_id;
+  UPDATE public.deposits SET status='approved' WHERE id=deposit_id;
+  IF (SELECT balance FROM public.profiles WHERE user_id=_user_id)<>initial_balance+10000 THEN RAISE EXCEPTION 'Deposit credit/idempotency failed'; END IF;
+  rejected:=false;
+  BEGIN UPDATE public.deposits SET status='pending' WHERE id=deposit_id; EXCEPTION WHEN OTHERS THEN rejected:=true; END;
+  IF NOT rejected THEN RAISE EXCEPTION 'Terminal deposit transition accepted'; END IF;
+  rejected:=false;
+  BEGIN UPDATE public.profiles SET balance=balance+99999 WHERE user_id=_user_id; EXCEPTION WHEN OTHERS THEN rejected:=true; END;
+  IF NOT rejected THEN RAISE EXCEPTION 'Direct balance mutation accepted'; END IF;
+  INSERT INTO public.withdrawals(user_id,amount,fee,net_amount,cpf,pix_key) VALUES(_user_id,6000,720,5280,'52998224725','test@example.invalid') RETURNING id INTO w1;
+  INSERT INTO public.withdrawals(user_id,amount,fee,net_amount,cpf,pix_key) VALUES(_user_id,28.57,3.43,25.14,'52998224725','test@example.invalid') RETURNING id INTO w2;
+  IF (SELECT balance FROM public.profiles WHERE user_id=_user_id)<>initial_balance+3971.43 THEN RAISE EXCEPTION 'Pending balance/cent rounding failed'; END IF;
+  UPDATE public.withdrawals SET status='rejected' WHERE id=w1;
+  SELECT balance INTO after_refund FROM public.profiles WHERE user_id=_user_id;
+  UPDATE public.withdrawals SET status='rejected' WHERE id=w1;
+  IF (SELECT balance FROM public.profiles WHERE user_id=_user_id)<>after_refund THEN RAISE EXCEPTION 'Duplicate refund'; END IF;
+  UPDATE public.withdrawals SET status='rejected' WHERE id=w2;
+  IF (SELECT balance FROM public.profiles WHERE user_id=_user_id)<>initial_balance+10000 THEN RAISE EXCEPTION 'Gross refund failed'; END IF;
+  rejected:=false;
+  BEGIN INSERT INTO public.withdrawals(user_id,amount,fee,net_amount,cpf,pix_key) VALUES(_user_id,1.001,.12,.881,'52998224725','test@example.invalid'); EXCEPTION WHEN OTHERS THEN rejected:=true; END;
+  IF NOT rejected THEN RAISE EXCEPTION 'Fractional cents accepted'; END IF;
+  rejected:=false;
+  BEGIN INSERT INTO public.withdrawals(user_id,amount,fee,net_amount,cpf,pix_key) VALUES(_user_id,100,12,88,'11111111111','test@example.invalid'); EXCEPTION WHEN OTHERS THEN rejected:=true; END;
+  IF NOT rejected THEN RAISE EXCEPTION 'Invalid CPF accepted'; END IF;
+  PERFORM set_config('request.jwt.claim.sub',_user_id::text,true);
+  SELECT id INTO plan FROM public.investment_plans WHERE slug='diamante-bruto' AND price=50 AND daily_return=20 AND duration_days=5;
+  IF plan IS NULL THEN RAISE EXCEPTION 'Plan values changed'; END IF;
+  investment_id:=public.buy_investment_plan(plan);
+  IF NOT EXISTS(SELECT 1 FROM public.investments WHERE id=investment_id AND status='pending' AND amount=50 AND daily_return=20 AND duration_days=5 AND credited_days=0) THEN RAISE EXCEPTION 'Purchase snapshot failed'; END IF;
+  IF (SELECT balance FROM public.profiles WHERE user_id=_user_id)<>initial_balance+9950 THEN RAISE EXCEPTION 'Purchase deduction failed'; END IF;
+  rejected:=false;
+  BEGIN PERFORM public.buy_investment_plan(plan); EXCEPTION WHEN OTHERS THEN rejected:=true; END;
+  IF NOT rejected THEN RAISE EXCEPTION 'Purchase limit bypass'; END IF;
+  UPDATE public.investments SET status='active' WHERE id=investment_id;
+  PERFORM public.sync_my_finances(); PERFORM public.sync_my_finances();
+  IF EXISTS(SELECT 1 FROM public.investment_earnings WHERE investment_id=investment_id AND user_id=_user_id) THEN
+   IF (SELECT credited_days FROM public.investments WHERE id=investment_id)<>0 THEN RAISE EXCEPTION 'Premature accrual'; END IF;
+  END IF;
+  rejected:=false;
+  BEGIN INSERT INTO public.investment_earnings(user_id,investment_id,cycle_day,amount) VALUES(_user_id,investment_id,1,20); EXCEPTION WHEN OTHERS THEN rejected:=true; END;
+  IF NOT rejected THEN RAISE EXCEPTION 'Early yield accepted'; END IF;
+  rejected:=false;
+  BEGIN UPDATE public.investments SET daily_return=20000 WHERE id=investment_id; EXCEPTION WHEN OTHERS THEN rejected:=true; END;
+  IF NOT rejected THEN RAISE EXCEPTION 'Financial snapshot mutated'; END IF;
+  IF has_table_privilege('authenticated','public.investments','INSERT') OR has_function_privilege('authenticated','private.accrue_investments(uuid)','EXECUTE') THEN RAISE EXCEPTION 'Privileged access exposed'; END IF;
+  RAISE EXCEPTION USING ERRCODE='Z0001',MESSAGE='rollback successful regression';
+ EXCEPTION WHEN SQLSTATE 'Z0001' THEN RETURN 'PASS: deposit credit/idempotency, terminal states, balance protection, withdrawal availability, cent rounding, refund/idempotency, CPF, purchase snapshot/limit, accrual timing, privileged access; all test changes rolled back';
+ END;
+END; $$;
+REVOKE ALL ON FUNCTION private.verify_financial_rules(uuid) FROM PUBLIC,anon,authenticated,service_role;
+COMMENT ON FUNCTION private.verify_financial_rules(uuid) IS 'Owner-only regression suite. Always rolls back successful test mutations inside an exception subtransaction.';
