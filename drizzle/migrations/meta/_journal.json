@@ -8,6 +8,20 @@
       "when": 1792184084251,
       "tag": "0000_repair_atomic_financial_flows",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792263893196,
+      "tag": "0001_financial_regression_checks",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792263915822,
+      "tag": "0002_validate_financial_regressions",
+      "breakpoints": true
     }
   ]
 }

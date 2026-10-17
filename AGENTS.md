@@ -9,3 +9,4 @@
 - Sync account finances through the shared query before displaying balances and use SQL hourly reconciliation for offline accounts; this keeps every financial screen consistent.
 - Process verified deposit approvals and withdrawal rejections with terminal-state triggers; this credits or refunds exactly once and prohibits client approval.
 - Never generate placeholder PIX payment codes; the payment button must fail closed until a real provider is configured.
+- Keep rollback-only financial regression helpers private and owner-only; tests must never grant clients privileged financial access.
