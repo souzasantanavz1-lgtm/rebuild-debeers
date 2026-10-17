@@ -6,11 +6,13 @@
 - [x] Executar pentest defensivo no frontend, dependências e Lovable Cloud
 - [x] Corrigir vulnerabilidades confirmadas sem alterar valores, retornos ou prazos
 - [x] Aplicar as seis fotos enviadas pelo usuário aos planos na ordem indicada e verificar que carregam
-- [ ] Criar a página Indicação integrada à navegação
+- [x] Criar a página Indicação integrada à navegação
 - [x] Ajustar retornos em progressão crescente conforme o valor investido
 - [x] Destacar o Pacote de Diamantes como menor investimento e maior retorno percentual da coleção
 - [x] Criar as páginas Sobre nós e Privacidade acessíveis pelo Menu do Perfil
-- [ ] Corrigir compra de planos, crédito real com teto de prazo e histórico financeiro idempotente
-- [ ] Corrigir arredondamento, saldo disponível e devolução de saques recusados
-- [ ] Remover PIX fictício e reforçar validações e autenticação sem mudar o layout
+- [x] Corrigir compra de planos, crédito real com teto de prazo e histórico financeiro idempotente
+- [x] Corrigir arredondamento, saldo disponível e devolução de saques recusados
+- [x] Remover PIX fictício e reforçar validações e autenticação sem mudar o layout
 - [ ] Verificar regras financeiras e isolamento com testes e fluxo autenticado
+- [ ] Ativar reCAPTCHA real no cadastro — bloqueado pelas chaves do Google
+- [ ] Ativar recebimento PIX e processamento de aprovações — bloqueado pela configuração de um provedor real

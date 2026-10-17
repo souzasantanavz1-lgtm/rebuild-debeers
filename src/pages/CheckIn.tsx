@@ -45,6 +45,12 @@ const CheckIn = () => {
 
   const refresh = async () => {
     if (!user) return;
+    const sync = await supabase.rpc("sync_my_finances");
+    if (sync.error) {
+      setInitialLoading(false);
+      toast({ title: "Não foi possível atualizar o saldo", description: "Tente novamente.", variant: "destructive" });
+      return;
+    }
     const [{ data: prof }, { data: weekIns }, { data: allIns }] = await Promise.all([
       supabase.from("profiles").select("balance").eq("user_id", user.id).maybeSingle(),
       supabase
