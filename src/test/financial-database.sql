@@ -1,4 +1,6 @@
--- Run with a managed database connection and a test_user psql variable.
+-- Run only through a privileged test connection with a test_user psql variable.
+-- The sandbox connection is intentionally read-only; never grant it access to run this suite.
+-- This suite covers transitions and early-credit rejection, not matured-cycle or concurrency behavior.
 -- Every operation rolls back, including successful financial writes.
 \set ON_ERROR_STOP on
 BEGIN;

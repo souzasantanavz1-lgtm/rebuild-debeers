@@ -13,6 +13,6 @@
 - [x] Corrigir compra de planos, crédito real com teto de prazo e histórico financeiro idempotente
 - [x] Corrigir arredondamento, saldo disponível e devolução de saques recusados
 - [x] Remover PIX fictício e reforçar validações e autenticação sem mudar o layout
-- [ ] Verificar regras financeiras e isolamento com testes e fluxo autenticado
+- [x] Verificar transições financeiras com rollback, testes unitários e isolamento via API autenticada; concorrência e ciclos vencidos não certificados
 - [ ] Ativar reCAPTCHA real no cadastro — bloqueado pelas chaves do Google
 - [ ] Ativar recebimento PIX e processamento de aprovações — bloqueado pela configuração de um provedor real
