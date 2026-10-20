@@ -14,6 +14,7 @@
 - [x] Corrigir arredondamento, saldo disponível e devolução de saques recusados
 - [x] Remover PIX fictício e reforçar validações e autenticação sem mudar o layout
 - [x] Verificar transições financeiras com rollback, testes unitários e isolamento via API autenticada; concorrência e ciclos vencidos não certificados
-- [ ] Ativar reCAPTCHA real no cadastro com validação no servidor e bloqueio do cadastro direto
-- [ ] Aplicar e testar saque mínimo de R$ 25 na tela e no banco
+- [x] Implementar reCAPTCHA real no cadastro; caixa validada no domínio e cadastros sem verificação bloqueados
+- [ ] Confirmar cadastro completo após desafio reCAPTCHA — depende de verificação humana no Google
+- [x] Aplicar e testar saque mínimo de R$ 25 na tela e no banco
 - [ ] Ativar recebimento PIX e processamento de aprovações — bloqueado pela configuração de um provedor real
