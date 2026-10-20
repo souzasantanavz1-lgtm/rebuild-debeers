@@ -7,6 +7,9 @@ export const moneySchema = z.number().finite().positive().refine(
 export const depositAmountSchema = moneySchema.refine(
   (value) => value >= 20 && value <= 50000, "Deposite entre R$ 20 e R$ 50.000.",
 );
+export const withdrawalAmountSchema = moneySchema.refine(
+  (value) => value >= 25, "O saque mínimo é R$ 25.",
+);
 
 export function withdrawalAmounts(amount: number): { fee: number; net: number } {
   moneySchema.parse(amount);

@@ -10,7 +10,7 @@ import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useFinances } from "@/hooks/use-finances";
-import { moneySchema, validCpf, withdrawalAmounts } from "@/lib/finance";
+import { moneySchema, withdrawalAmountSchema, validCpf, withdrawalAmounts } from "@/lib/finance";
 
 type Withdrawal = {
   id: string;
@@ -48,6 +48,7 @@ const Saque = () => {
   const handleSubmit = async () => {
     if (!user || loading) return;
     if (!validAmount) return toast({ title: "Valor inválido", description: "Use um valor positivo com até duas casas decimais.", variant: "destructive" });
+    if (!withdrawalAmountSchema.safeParse(value).success) return toast({ title: "Saque mínimo de R$ 25", variant: "destructive" });
     if (value > balance) return toast({ title: "Saldo insuficiente", variant: "destructive" });
     if (!validCpf(cpf)) return toast({ title: "CPF inválido", variant: "destructive" });
     const pix = pixKey.trim();
@@ -97,8 +98,9 @@ const Saque = () => {
             <div className="space-y-3">
               <div>
                 <Label className="text-sm">Valor do saque</Label>
-                <Input type="number" inputMode="decimal" value={amount}
+                <Input type="number" inputMode="decimal" min={25} step="0.01" value={amount}
                   onChange={(e) => setAmount(e.target.value)} placeholder="0,00" className="mt-1.5" />
+                <p className="mt-1 text-xs text-muted-foreground">Saque mínimo: R$ 25.</p>
               </div>
               <div>
                 <Label className="text-sm">CPF</Label>

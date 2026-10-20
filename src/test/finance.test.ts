@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { businessDate, depositAmountSchema, validCpf, withdrawalAmounts } from "@/lib/finance";
+import { businessDate, depositAmountSchema, withdrawalAmountSchema, validCpf, withdrawalAmounts } from "@/lib/finance";
 
 describe("financial rules", () => {
+  it("enforces the R$25 gross withdrawal minimum before the 12% fee", () => {
+    expect(withdrawalAmountSchema.safeParse(24.99).success).toBe(false);
+    expect(withdrawalAmountSchema.safeParse(25).success).toBe(true);
+    expect(withdrawalAmounts(25)).toEqual({ fee: 3, net: 22 });
+  });
   it("applies the mandatory 12% withdrawal fee", () => {
     expect(withdrawalAmounts(100)).toEqual({ fee: 12, net: 88 });
   });

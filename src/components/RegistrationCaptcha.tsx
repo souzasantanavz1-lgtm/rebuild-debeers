@@ -52,7 +52,8 @@ export function RegistrationCaptcha({ onToken, resetVersion }: RegistrationCaptc
   useEffect(() => {
     let cancelled = false;
     loadCaptcha().then(() => {
-      if (cancelled || !container.current || !window.grecaptcha) return;
+      if (cancelled || !container.current || !window.grecaptcha || widget.current !== undefined) return;
+      tokenCallback.current("");
       widget.current = window.grecaptcha.render(container.current, {
         sitekey: SITE_KEY,
         size: "compact",
