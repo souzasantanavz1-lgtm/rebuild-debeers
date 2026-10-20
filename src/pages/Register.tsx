@@ -12,11 +12,14 @@ import { registerSchema, type RegisterFormData } from "@/lib/validations/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import deBeersLogo from "@/assets/de-beers-logo.svg";
+import { RegistrationCaptcha } from "@/components/RegistrationCaptcha";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaReset, setCaptchaReset] = useState(0);
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -52,27 +55,37 @@ const Register = () => {
   }
 
   const onSubmit = async (data: RegisterFormData) => {
+    if (!captchaToken) {
+      toast({ title: "Verificação necessária", description: "Confirme que não é um robô.", variant: "destructive" });
+      return;
+    }
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: window.location.origin,
-          data: {
-            name: data.name,
-            phone: data.phone || "",
-            referral_code: data.referralCode?.trim().toUpperCase() || "",
-          },
+      const { data: result, error } = await supabase.functions.invoke("register-with-captcha", {
+        body: {
+          name: data.name, email: data.email, password: data.password,
+          phone: data.phone || "", referralCode: data.referralCode?.trim().toUpperCase() || "", captchaToken,
         },
       });
 
-      if (error) {
+      if (error || !result?.success) {
+        let description = result?.error || "Não foi possível criar a conta. Tente novamente.";
+        if (error?.context instanceof Response) {
+          const response = await error.context.json().catch(() => null);
+          description = response?.error || description;
+        }
         toast({
           title: "Erro ao criar conta",
-          description: error.message,
+          description,
           variant: "destructive",
         });
+        return;
+      }
+
+      const { error: loginError } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
+      if (loginError) {
+        toast({ title: "Conta criada", description: "Entre com seu e-mail e senha para continuar." });
+        navigate("/");
         return;
       }
 
@@ -88,6 +101,8 @@ const Register = () => {
         variant: "destructive",
       });
     } finally {
+      setCaptchaToken("");
+      setCaptchaReset((value) => value + 1);
       setIsLoading(false);
     }
   };
@@ -170,7 +185,9 @@ const Register = () => {
               {errors.passwordConfirmation && <p className="text-sm text-destructive flex items-center gap-1"><span>⚠</span> {errors.passwordConfirmation.message}</p>}
             </div>
 
-            <Button type="submit" className="w-full h-12 text-base font-medium" disabled={isLoading}>
+            <RegistrationCaptcha onToken={setCaptchaToken} resetVersion={captchaReset} />
+
+            <Button type="submit" className="w-full h-12 text-base font-medium" disabled={isLoading || !captchaToken}>
               {isLoading ? (
                 <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Criando conta...</>
               ) : (

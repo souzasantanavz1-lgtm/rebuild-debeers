@@ -25,6 +25,12 @@ BEGIN
  denied:=false;
  BEGIN UPDATE public.profiles SET balance=balance+100000 WHERE user_id=owner_id; EXCEPTION WHEN OTHERS THEN denied:=true; END;
  IF NOT denied THEN RAISE EXCEPTION 'Direct balance mutation allowed'; END IF;
+ denied:=false;
+ BEGIN INSERT INTO public.withdrawals(user_id,amount,fee,net_amount,cpf,pix_key) VALUES(owner_id,24.99,3,21.99,'52998224725','test@example.invalid'); EXCEPTION WHEN check_violation THEN denied:=true; END;
+ IF NOT denied THEN RAISE EXCEPTION 'Withdrawal below R$25 accepted'; END IF;
+ INSERT INTO public.withdrawals(user_id,amount,fee,net_amount,cpf,pix_key) VALUES(owner_id,25,3,22,'52998224725','test@example.invalid') RETURNING id INTO second_withdrawal;
+ IF (SELECT balance FROM public.profiles WHERE user_id=owner_id)<>initial_balance+9975 THEN RAISE EXCEPTION 'R$25 gross deduction incorrect'; END IF;
+ UPDATE public.withdrawals SET status='rejected' WHERE id=second_withdrawal;
  -- Both pending withdrawals must succeed; the first is already deducted, not reserved twice.
  INSERT INTO public.withdrawals(user_id,amount,fee,net_amount,cpf,pix_key) VALUES(owner_id,6000,720,5280,'52998224725','test@example.invalid') RETURNING id INTO withdrawal_id;
  INSERT INTO public.withdrawals(user_id,amount,fee,net_amount,cpf,pix_key) VALUES(owner_id,28.57,3.43,25.14,'52998224725','test@example.invalid') RETURNING id INTO second_withdrawal;
