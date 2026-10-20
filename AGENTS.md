@@ -10,3 +10,4 @@
 - Process verified deposit approvals and withdrawal rejections with terminal-state triggers; this credits or refunds exactly once and prohibits client approval.
 - Never generate placeholder PIX payment codes; the payment button must fail closed until a real provider is configured.
 - Keep rollback-only financial regression helpers private and owner-only; tests must never grant clients privileged financial access.
+- Route registration through `register-with-captcha` and disable direct Auth signup; Google reCAPTCHA must be verified server-side with trusted hostname, freshness and leaked-password checks before privileged account creation.
